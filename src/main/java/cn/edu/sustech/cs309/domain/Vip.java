@@ -1,6 +1,7 @@
 package cn.edu.sustech.cs309.domain;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -10,10 +11,10 @@ import java.util.Date;
 
 @Entity
 @Data
-@MappedSuperclass
+@NoArgsConstructor
 @Table(name = "vip")
 @EntityListeners(AuditingEntityListener.class)
-public abstract class Vip {
+public class Vip{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,16 +28,10 @@ public abstract class Vip {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updateTime;
 
-    @Column(name = "duration", nullable = false, length = 32, unique = true)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date duration;
+    @Column(name = "duration", nullable = false)
+    private Integer duration;
 
-
-    public Vip() {
-
-    }
-
-    public Vip(Date duration) {
+    public Vip(Integer duration) {
         this.duration = duration;
     }
 

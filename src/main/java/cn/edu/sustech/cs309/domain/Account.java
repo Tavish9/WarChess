@@ -1,6 +1,7 @@
 package cn.edu.sustech.cs309.domain;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -10,10 +11,10 @@ import java.util.Date;
 
 @Entity
 @Data
-@MappedSuperclass
+@NoArgsConstructor
 @Table(name = "account")
 @EntityListeners(AuditingEntityListener.class)
-public abstract class Account {
+public class Account {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,14 +28,14 @@ public abstract class Account {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updateTime;
 
-    @Column(name = "user_name", nullable = false, length = 32, unique = true)
+    @Column(name = "username", nullable = false, length = 32, unique = true)
     private String username;
 
     private String password;
 
-    public Account() {
-
-    }
+    @OneToOne(targetEntity = Vip.class, cascade = CascadeType.ALL)
+    @JoinColumn(name = "vip_id")
+    private Vip vip;
 
     public Account(String username, String password) {
         this.username = username;
