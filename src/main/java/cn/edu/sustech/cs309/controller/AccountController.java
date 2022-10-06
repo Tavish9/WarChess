@@ -3,18 +3,22 @@ package cn.edu.sustech.cs309.controller;
 import cn.edu.sustech.cs309.domain.ResponseResult;
 import cn.edu.sustech.cs309.dto.AccountDTO;
 import cn.edu.sustech.cs309.service.AccountService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Api(tags = "登录注册页面")
 @RestController
 @Slf4j
 public class AccountController {
     @Autowired
     private AccountService accountService;
 
+    @ApiOperation(value = "用户注册")
     @PostMapping("/register")
     public ResponseResult<AccountDTO> register(@RequestParam(value = "username") String username,
                                                @RequestParam(value = "password") String password) {
