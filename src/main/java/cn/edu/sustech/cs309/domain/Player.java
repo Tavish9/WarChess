@@ -15,10 +15,9 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "account")
+@Table(name = "player")
 @EntityListeners(AuditingEntityListener.class)
-public class Account {
-
+public class Player {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -31,18 +30,28 @@ public class Account {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updateTime;
 
-    @Column(nullable = false, length = 32, unique = true)
-    private String username;
+    @ManyToOne
+    @JoinColumn(name = "account_id")
+    private Account account;
 
-    private String password;
+    private String name;
 
-    @OneToOne(targetEntity = Vip.class, cascade = CascadeType.ALL)
-    @JoinColumn(name = "vip_id")
-    private Vip vip;
+    @Builder.Default
+    private Long exp = 0L;
 
-    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+//    @Builder.Default
+    @Column(name = "max_exp")
+    private Long maxExp;
+
+    @Builder.Default
+    private Integer level = 1;
+
+    @Builder.Default
+    private Long coins = 0L;
+
+    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @Builder.Default
-    private List<Player> players = new ArrayList<>();
+    private List<CharacterRecord> characterRecords = new ArrayList<>();
 
 }

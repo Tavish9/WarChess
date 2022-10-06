@@ -1,24 +1,24 @@
 package cn.edu.sustech.cs309.domain;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 @Entity
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "account")
+@Table(name = "character_record")
 @EntityListeners(AuditingEntityListener.class)
-public class Account {
-
+public class CharacterRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -31,18 +31,21 @@ public class Account {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updateTime;
 
-    @Column(nullable = false, length = 32, unique = true)
-    private String username;
+    @ManyToOne
+    @JoinColumn(name = "character_id")
+    private Character character;
 
-    private String password;
+    @ManyToOne
+    @JoinColumn(name = "player_id")
+    private Player player;
 
-    @OneToOne(targetEntity = Vip.class, cascade = CascadeType.ALL)
-    @JoinColumn(name = "vip_id")
-    private Vip vip;
-
-    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
-    @ToString.Exclude
     @Builder.Default
-    private List<Player> players = new ArrayList<>();
+    private Long exp = 0L;
 
+//    @Builder.Default
+    @Column(name = "max_exp")
+    private Long maxExp;
+
+    @Builder.Default
+    private Integer level = 1;
 }

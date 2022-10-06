@@ -1,5 +1,7 @@
 package cn.edu.sustech.cs309.domain;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
@@ -11,10 +13,12 @@ import java.util.Date;
 
 @Entity
 @Data
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "vip")
 @EntityListeners(AuditingEntityListener.class)
-public class Vip{
+public class Vip {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,9 +34,5 @@ public class Vip{
 
     @Column(name = "duration", nullable = false)
     private Integer duration;
-
-    public Vip(Integer duration) {
-        this.duration = duration;
-    }
 
 }
