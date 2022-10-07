@@ -1,9 +1,12 @@
 package cn.edu.sustech.cs309.dto;
 
-import java.io.Serializable;
+import cn.edu.sustech.cs309.domain.CharacterClass;
 
-public record CharacterDTO(String name, String characterClass, double attack, double defense,
-                           double hp, Long exp, Long maxExp, Integer level) implements Serializable {
+import java.io.Serializable;
+import java.util.List;
+
+public record CharacterDTO(Integer id, String name, CharacterClass characterClass, double attack, double defense,
+                           double hp, Long exp, Long maxExp, Integer level, List<EquipmentDTO> equipmentDTOS) implements Serializable {
 }
 
 
