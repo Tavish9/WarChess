@@ -46,7 +46,7 @@ public class Character {
     @Builder.Default
     private List<CharacterRecord> characterRecords = new ArrayList<>();
 
-    @OneToMany(mappedBy = "belong_character", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "character", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @Builder.Default
     private List<EquipmentRecord> equipmentRecords = new ArrayList<>();

@@ -39,7 +39,7 @@ public class Player {
     @Builder.Default
     private Long exp = 0L;
 
-//    @Builder.Default
+    //    @Builder.Default
     @Column(name = "max_exp")
     private Long maxExp;
 
@@ -54,4 +54,8 @@ public class Player {
     @Builder.Default
     private List<CharacterRecord> characterRecords = new ArrayList<>();
 
+    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @Builder.Default
+    private List<EquipmentRecord> equipmentRecords = new ArrayList<>();
 }

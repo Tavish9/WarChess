@@ -43,6 +43,5 @@ public class EquipmentRecord {
 
     @ManyToOne
     @JoinColumn(name = "character_id")
-    private Character belong_character;
-
+    private Character character;
 }
