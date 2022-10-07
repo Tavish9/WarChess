@@ -58,4 +58,9 @@ public class Player {
     @ToString.Exclude
     @Builder.Default
     private List<EquipmentRecord> equipmentRecords = new ArrayList<>();
+
+    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @Builder.Default
+    private List<ItemRecord> itemRecords=new ArrayList<>();
 }
