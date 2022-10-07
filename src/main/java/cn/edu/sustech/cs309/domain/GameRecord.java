@@ -1,24 +1,24 @@
 package cn.edu.sustech.cs309.domain;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 @Entity
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "game")
+@Table(name = "game_record")
 @EntityListeners(AuditingEntityListener.class)
-public class Game {
-
+public class GameRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -31,16 +31,9 @@ public class Game {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updateTime;
 
-    //need foreign key ?
-    private Integer player1id;
+    @ManyToOne
+    @JoinColumn(name = "game_id")
+    private Game game;
 
-    private Integer player2id;
-
-    //false means player1 first,otherwise player2 first
-    private Boolean playerFirst;
-
-    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
-    @ToString.Exclude
-    @Builder.Default
-    private List<GameRecord> gameRecords = new ArrayList<>();
+    private Integer round;
 }
