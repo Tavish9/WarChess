@@ -16,7 +16,7 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "item_record")
+@Table(name = "item_record", uniqueConstraints = {@UniqueConstraint(columnNames = {"item_id", "player_id"})})
 @EntityListeners(AuditingEntityListener.class)
 public class ItemRecord {
     @Id
@@ -31,7 +31,9 @@ public class ItemRecord {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updateTime;
 
-    private Integer num;
+    @ManyToOne
+    @JoinColumn(name = "game_id")
+    private Game game;
 
     @ManyToOne
     @JoinColumn(name = "item_id")
@@ -40,4 +42,6 @@ public class ItemRecord {
     @ManyToOne
     @JoinColumn(name = "player_id")
     private Player player;
+
+    private Integer num;
 }

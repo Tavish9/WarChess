@@ -37,11 +37,14 @@ public class Equipment {
     @Enumerated(EnumType.STRING)
     private EquipmentClass equipmentClass;
 
-    private double attack;
+    @Builder.Default
+    private double attack = 0;
 
-    private double defense;
+    @Builder.Default
+    private double defense = 0;
 
-    private double hp;
+    @Builder.Default
+    private double hp = 0;
     
     private String description;
 

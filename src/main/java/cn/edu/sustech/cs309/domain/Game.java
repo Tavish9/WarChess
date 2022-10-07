@@ -31,13 +31,20 @@ public class Game {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updateTime;
 
-    //need foreign key ?
-    private Integer player1id;
+    @OneToOne
+    @JoinColumn(name = "player1_id")
+    private Player player1id;
 
-    private Integer player2id;
+    @OneToOne
+    @JoinColumn(name = "player2_id")
+    private Player player2id;
 
     //false means player1 first,otherwise player2 first
     private Boolean playerFirst;
+
+    @ManyToOne
+    @JoinColumn(name = "map_id")
+    private Map map;
 
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
@@ -47,6 +54,21 @@ public class Game {
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @Builder.Default
-    private List<Archive> archives = new ArrayList<>();
+    private List<CharacterRecord> characterRecords = new ArrayList<>();
+
+    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @Builder.Default
+    private List<ItemRecord> itemRecords = new ArrayList<>();
+
+    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @Builder.Default
+    private List<EquipmentRecord> equipmentRecords = new ArrayList<>();
+
+    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @Builder.Default
+    private List<StructureRecord> structureRecords = new ArrayList<>();
 
 }

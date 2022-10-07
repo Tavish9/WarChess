@@ -31,12 +31,16 @@ public class CharacterRecord {
     private Date updateTime;
 
     @ManyToOne
-    @JoinColumn(name = "character_id")
-    private Character character;
+    @JoinColumn(name = "game_id")
+    private Game game;
 
     @ManyToOne
     @JoinColumn(name = "player_id")
     private Player player;
+
+    @ManyToOne
+    @JoinColumn(name = "character_id")
+    private Character character;
 
     @Builder.Default
     private Long exp = 0L;
@@ -48,9 +52,11 @@ public class CharacterRecord {
     @Builder.Default
     private Integer level = 1;
 
-    //delete character record but not delete correspond equipment
-//    @OneToMany(mappedBy = "characterRecord", cascade = CascadeType.PERSIST)
-//    @ToString.Exclude
-//    @Builder.Default
-//    private List<EquipmentRecord> equipmentRecords = new ArrayList<>();
+    private Integer hp;
+
+    @OneToMany(mappedBy = "characterRecord", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @Builder.Default
+    private List<EquipmentRecord> equipmentRecords = new ArrayList<>();
+
 }

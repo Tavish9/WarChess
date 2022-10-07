@@ -33,13 +33,11 @@ public class Archive {
     private Date updateTime;
 
     @ManyToOne
-    @JoinColumn(name = "player_id")
-    private Player player;
+    @JoinColumn(name = "account_id")
+    private Account account;
 
-    @ManyToOne
-    @JoinColumn(name = "game_id")
+    @OneToOne
+    @JoinColumn(name = "game_id", unique = true)
     private Game game;
 
-    //should check if round is valid
-    private Integer round;
 }

@@ -36,4 +36,8 @@ public class GameRecord {
     private Game game;
 
     private Integer round;
+
+    @ManyToOne
+    @JoinColumn(name = "player_id")
+    private Player player;
 }

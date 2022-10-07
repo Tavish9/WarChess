@@ -1,15 +1,13 @@
 package cn.edu.sustech.cs309.domain;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -36,6 +34,11 @@ public class Map {
 
     private String name;
 
+    @OneToMany(mappedBy = "map", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @ToString.Exclude
+    @Builder.Default
+    private List<Game> games = new ArrayList<>();
+
     @Transient
-    private List< List<Integer> > data;
+    private List<List<Integer>> data;
 }

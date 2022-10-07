@@ -43,6 +43,11 @@ public class Account {
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @Builder.Default
+    private List<Archive> archives = new ArrayList<>();
+
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @Builder.Default
     private List<Player> players = new ArrayList<>();
 
 }

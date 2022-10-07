@@ -34,25 +34,8 @@ public class Player {
     @JoinColumn(name = "account_id")
     private Account account;
 
-    private String name;
-
-    @Builder.Default
-    private Long exp = 0L;
-
-    //    @Builder.Default
-    @Column(name = "max_exp")
-    private Long maxExp;
-
-    @Builder.Default
-    private Integer level = 1;
-
     @Builder.Default
     private Long coins = 0L;
-
-    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
-    @ToString.Exclude
-    @Builder.Default
-    private List<Archive> archives = new ArrayList<>();
 
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
@@ -73,4 +56,9 @@ public class Player {
     @ToString.Exclude
     @Builder.Default
     private List<StructureRecord> structureRecords = new ArrayList<>();
+
+    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @Builder.Default
+    private List<GameRecord> gameRecords = new ArrayList<>();
 }

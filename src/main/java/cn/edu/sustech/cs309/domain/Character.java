@@ -30,9 +30,10 @@ public class Character {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updateTime;
 
+    @Column(nullable = false)
     private String name;
 
-    @Column(name = "character_class")
+    @Column(name = "character_class", nullable = false)
     @Enumerated(EnumType.STRING)
     private CharacterClass characterClass;
 

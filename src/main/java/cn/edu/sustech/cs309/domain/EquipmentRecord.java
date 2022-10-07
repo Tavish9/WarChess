@@ -34,6 +34,10 @@ public class EquipmentRecord {
     private Date updateTime;
 
     @ManyToOne
+    @JoinColumn(name = "game_id")
+    private Game game;
+
+    @ManyToOne
     @JoinColumn(name = "equipment_id")
     private Equipment equipment;
 
@@ -41,7 +45,7 @@ public class EquipmentRecord {
     @JoinColumn(name = "player_id")
     private Player player;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "character_record_id")
     private CharacterRecord characterRecord;
 }

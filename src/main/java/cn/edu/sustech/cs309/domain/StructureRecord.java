@@ -31,6 +31,9 @@ public class StructureRecord {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updateTime;
 
+    @ManyToOne
+    @JoinColumn(name = "game_id")
+    private Game game;
 
     @ManyToOne
     @JoinColumn(name = "structure_id")
