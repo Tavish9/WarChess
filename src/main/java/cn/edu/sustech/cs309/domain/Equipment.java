@@ -1,5 +1,6 @@
 package cn.edu.sustech.cs309.domain;
 
+
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -15,9 +16,9 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "character")
+@Table(name = "equipment")
 @EntityListeners(AuditingEntityListener.class)
-public class Character {
+public class Equipment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -32,8 +33,8 @@ public class Character {
 
     private String name;
 
-    @Column(name = "character_class")
-    private String characterClass;
+    @Column(name = "equipment_class")
+    private String equipmentClass;
 
     private double attack;
 
@@ -41,12 +42,7 @@ public class Character {
 
     private double hp;
 
-    @OneToMany(mappedBy = "character", cascade = CascadeType.ALL, orphanRemoval = true)
-    @ToString.Exclude
-    @Builder.Default
-    private List<CharacterRecord> characterRecords = new ArrayList<>();
-
-    @OneToMany(mappedBy = "belong_character", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "equipment", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @Builder.Default
     private List<EquipmentRecord> equipmentRecords = new ArrayList<>();
