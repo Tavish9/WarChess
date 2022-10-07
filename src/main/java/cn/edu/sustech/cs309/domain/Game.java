@@ -43,4 +43,10 @@ public class Game {
     @ToString.Exclude
     @Builder.Default
     private List<GameRecord> gameRecords = new ArrayList<>();
+
+    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @Builder.Default
+    private List<Archive> archives = new ArrayList<>();
+
 }
