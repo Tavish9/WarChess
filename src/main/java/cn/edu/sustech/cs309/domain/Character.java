@@ -41,6 +41,8 @@ public class Character {
 
     private double hp;
 
+    private String description;
+
     @OneToMany(mappedBy = "character", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @Builder.Default
