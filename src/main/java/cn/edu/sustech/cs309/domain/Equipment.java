@@ -41,6 +41,8 @@ public class Equipment {
     private double defense;
 
     private double hp;
+    
+    private String description;
 
     @OneToMany(mappedBy = "equipment", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
