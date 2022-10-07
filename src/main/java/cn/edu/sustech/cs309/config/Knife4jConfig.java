@@ -18,10 +18,10 @@ public class Knife4jConfig{
     @Bean
     public Docket createRestApi() {
         return new Docket(DocumentationType.SWAGGER_2)
-                .host("http://localhost:9999/")
+                .host("http://localhost:2333/")
                 .apiInfo(apiInfo())
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("com.github.xiaoymin.knife4j.controller"))
+                .apis(RequestHandlerSelectors.basePackage("cn.edu.sustech.cs309.controller"))
                 .paths(PathSelectors.any())
                 .build();
     }
