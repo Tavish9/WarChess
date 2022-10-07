@@ -33,7 +33,8 @@ public class Character {
     private String name;
 
     @Column(name = "character_class")
-    private String characterClass;
+    @Enumerated(EnumType.STRING)
+    private CharacterClass characterClass;
 
     private double attack;
 

@@ -34,7 +34,8 @@ public class Equipment {
     private String name;
 
     @Column(name = "equipment_class")
-    private String equipmentClass;
+    @Enumerated(EnumType.STRING)
+    private EquipmentClass equipmentClass;
 
     private double attack;
 
