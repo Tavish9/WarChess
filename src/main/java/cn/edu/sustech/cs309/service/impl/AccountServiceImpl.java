@@ -26,7 +26,7 @@ public class AccountServiceImpl implements AccountService {
             Account account = Account.builder().username(username).password(password).build();
             log.debug("create account: " + account);
             account = accountRepository.save(account);
-            return ResponseResult.success(HttpStatus.OK.value(), new AccountDTO(account.getUsername(), null));
+            return ResponseResult.success(HttpStatus.OK.value(), new AccountDTO(account.getId(), account.getUsername(), null));
         }
     }
 
@@ -41,7 +41,7 @@ public class AccountServiceImpl implements AccountService {
             account1.setPassword(newPassword);
             log.debug("update password:" + account1);
             account1 = accountRepository.save(account1);
-            return ResponseResult.success(HttpStatus.OK.value(), new AccountDTO(account1.getUsername(), null));
+            return ResponseResult.success(HttpStatus.OK.value(), new AccountDTO(account1.getId(), account1.getUsername(), null));
         }
     }
 }
