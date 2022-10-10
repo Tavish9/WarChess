@@ -6,7 +6,7 @@ import cn.edu.sustech.cs309.dto.AccountDTO;
 import org.apache.tomcat.websocket.AuthenticationException;
 
 public interface AccountService {
-    ResponseResult<AccountDTO> createAccount(String username, String password);
+    AccountDTO createAccount(String username, String password);
 
-    ResponseResult<AccountDTO> updatePassword(String username, String oldPassword, String newPassword) throws AuthenticationException;
+    AccountDTO updatePassword(String username, String oldPassword, String newPassword) throws AuthenticationException;
 }
