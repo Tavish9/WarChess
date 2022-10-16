@@ -52,6 +52,15 @@ public class Player {
     private Integer peaceDegree=0;
 
 
+    @Column(name = "techtree_feasible")
+    @Transient
+    private List<Integer> techtreeFeasible;
+
+    @Column(name = "techtree_light")
+    @Transient
+    private List<Integer> techtreeLight;
+
+
     @Transient
     private List<List<Integer>> vision;
 
