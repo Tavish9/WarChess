@@ -33,15 +33,14 @@ public class Character {
     @Column(nullable = false)
     private String name;
 
-    @Column(name = "character_class", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private CharacterClass characterClass;
-
     private double attack;
 
     private double defense;
 
     private double hp;
+
+    @Column(name="action_range")
+    private Integer actionRange;
 
     private String description;
 

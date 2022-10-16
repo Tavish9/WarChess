@@ -45,7 +45,9 @@ public class EquipmentRecord {
     @JoinColumn(name = "player_id")
     private Player player;
 
-    @ManyToOne
-    @JoinColumn(name = "character_record_id")
-    private CharacterRecord characterRecord;
+    private Integer number;
+
+//    @ManyToOne
+//    @JoinColumn(name = "character_record_id")
+//    private CharacterRecord characterRecord;
 }

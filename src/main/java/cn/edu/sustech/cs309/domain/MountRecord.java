@@ -1,23 +1,25 @@
 package cn.edu.sustech.cs309.domain;
 
-import lombok.*;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 @Entity
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "item")
+@Table(name = "mount_record")
 @EntityListeners(AuditingEntityListener.class)
-public class Item {
+public class MountRecord {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,18 +33,21 @@ public class Item {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updateTime;
 
-    private String name;
+    @ManyToOne
+    @JoinColumn(name = "game_id")
+    private Game game;
 
-    private String description;
+    @ManyToOne
+    @JoinColumn(name = "mount_id")
+    private Mount mount;
 
-    private Integer hp;
+    @ManyToOne
+    @JoinColumn(name = "player_id")
+    private Player player;
 
-    private Integer attack;
+    private Integer number;
 
-    private Integer defense;
-
-    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
-    @ToString.Exclude
-    @Builder.Default
-    private List<ItemRecord> itemRecords = new ArrayList<>();
+//    @ManyToOne
+//    @JoinColumn(name = "character_record_id")
+//    private CharacterRecord characterRecord;
 }

@@ -1,5 +1,6 @@
 package cn.edu.sustech.cs309.domain;
 
+
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -15,10 +16,9 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "item")
+@Table(name = "mount")
 @EntityListeners(AuditingEntityListener.class)
-public class Item {
-
+public class Mount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -33,16 +33,19 @@ public class Item {
 
     private String name;
 
+    @Builder.Default
+    private double attack = 0;
+
+    @Builder.Default
+    private double defense = 0;
+
+    @Column(name="action_range")
+    private Integer actionRange;
+
     private String description;
 
-    private Integer hp;
-
-    private Integer attack;
-
-    private Integer defense;
-
-    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "mount", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @Builder.Default
-    private List<ItemRecord> itemRecords = new ArrayList<>();
+    private List<MountRecord> mountRecords = new ArrayList<>();
 }

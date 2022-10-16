@@ -49,5 +49,4 @@ public class Account {
     @ToString.Exclude
     @Builder.Default
     private List<Player> players = new ArrayList<>();
-
 }

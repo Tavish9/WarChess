@@ -37,6 +37,24 @@ public class Player {
     @Builder.Default
     private Long coins = 0L;
 
+
+    @OneToOne(targetEntity = Game.class, cascade = CascadeType.ALL)
+    @JoinColumn(name = "game_id")
+    private Game game;
+
+
+    @Builder.Default
+    @Column(name="prosperity_degree")
+    private Integer prosperityDegree=0;
+
+    @Builder.Default
+    @Column(name="peace_degree")
+    private Integer peaceDegree=0;
+
+
+    @Transient
+    private List<List<Integer>> vision;
+
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @Builder.Default
@@ -60,5 +78,5 @@ public class Player {
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @Builder.Default
-    private List<GameRecord> gameRecords = new ArrayList<>();
+    private List<MountRecord> mountRecords = new ArrayList<>();
 }

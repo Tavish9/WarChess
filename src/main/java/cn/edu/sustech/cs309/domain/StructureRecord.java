@@ -31,6 +31,17 @@ public class StructureRecord {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updateTime;
 
+
+    private Integer level;
+
+    @Column(name="ramining_round")
+    private Integer remainingRound;
+
+    private Integer value;
+
+    private Integer x;
+
+    private Integer y;
     @ManyToOne
     @JoinColumn(name = "game_id")
     private Game game;

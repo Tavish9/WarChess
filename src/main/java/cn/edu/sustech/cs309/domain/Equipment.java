@@ -43,9 +43,9 @@ public class Equipment {
     @Builder.Default
     private double defense = 0;
 
-    @Builder.Default
-    private double hp = 0;
-    
+    @Column(name="attack_range")
+    private Integer attackRange;
+
     private String description;
 
     @OneToMany(mappedBy = "equipment", cascade = CascadeType.ALL, orphanRemoval = true)

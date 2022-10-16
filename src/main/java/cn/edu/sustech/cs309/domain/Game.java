@@ -71,4 +71,8 @@ public class Game {
     @Builder.Default
     private List<StructureRecord> structureRecords = new ArrayList<>();
 
+    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @Builder.Default
+    private List<MountRecord> mountRecords = new ArrayList<>();
 }
