@@ -1,5 +1,6 @@
 package cn.edu.sustech.cs309.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -31,18 +32,10 @@ public class CharacterRecord {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updateTime;
 
-    @ManyToOne
-    @JoinColumn(name = "game_id")
-    private Game game;
-
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "player_id")
     private Player player;
-
-//    @ManyToOne
-//    @JoinColumn(name = "character_id")
-//    private Character character;
-
 
     @Column(name = "character_class", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -51,11 +44,11 @@ public class CharacterRecord {
     @Builder.Default
     private Integer level = 1;
 
-    private double attack;
+    private Integer attack;
 
-    private double defense;
+    private Integer defense;
 
-    private double hp;
+    private Integer hp;
 
     @Column(name="action_range")
     private Integer actionRange;
@@ -64,18 +57,11 @@ public class CharacterRecord {
 
     private Integer y;
 
-    @ManyToOne
-    @JoinColumn(name = "equipment_id")
-    private Equipment equipment;
+    @OneToOne
+    @JoinColumn(name = "equipment_record_id")
+    private EquipmentRecord equipmentRecord;
 
-
-    @ManyToOne
-    @JoinColumn(name = "mount_id")
-    private Mount mount;
-
-//    @OneToMany(mappedBy = "characterRecord", cascade = CascadeType.ALL, orphanRemoval = true)
-//    @ToString.Exclude
-//    @Builder.Default
-//    private List<EquipmentRecord> equipmentRecords = new ArrayList<>();
-
+    @OneToOne
+    @JoinColumn(name = "mount_record_id")
+    private MountRecord mountRecord;
 }

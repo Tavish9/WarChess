@@ -1,5 +1,6 @@
 package cn.edu.sustech.cs309.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,7 +17,7 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "item_record", uniqueConstraints = {@UniqueConstraint(columnNames = {"item_id", "player_id"})})
+@Table(name = "item_record")
 @EntityListeners(AuditingEntityListener.class)
 public class ItemRecord {
     @Id
@@ -32,16 +33,14 @@ public class ItemRecord {
     private Date updateTime;
 
     @ManyToOne
-    @JoinColumn(name = "game_id")
-    private Game game;
-
-    @ManyToOne
     @JoinColumn(name = "item_id")
     private Item item;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "player_id")
     private Player player;
 
-    private Integer num;
+    @Builder.Default
+    private Boolean used = false;
 }

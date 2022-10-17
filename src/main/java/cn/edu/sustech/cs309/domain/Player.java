@@ -1,5 +1,7 @@
 package cn.edu.sustech.cs309.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -35,22 +37,20 @@ public class Player {
     private Account account;
 
     @Builder.Default
-    private Long coins = 0L;
+    private Long stars = 0L;
 
-
-    @OneToOne(targetEntity = Game.class, cascade = CascadeType.ALL)
+    @JsonIgnore
+    @ManyToOne
     @JoinColumn(name = "game_id")
     private Game game;
 
+    @Builder.Default
+    @Column(name = "prosperity_degree")
+    private Integer prosperityDegree = 0;
 
     @Builder.Default
-    @Column(name="prosperity_degree")
-    private Integer prosperityDegree=0;
-
-    @Builder.Default
-    @Column(name="peace_degree")
-    private Integer peaceDegree=0;
-
+    @Column(name = "peace_degree")
+    private Integer peaceDegree = 0;
 
     @Column(name = "techtree_feasible")
     private String techtreeFeasible;
@@ -58,31 +58,35 @@ public class Player {
     @Column(name = "techtree_light")
     private String techtreeLight;
 
-
     @Transient
     private String vision;
 
-    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
     @ToString.Exclude
     @Builder.Default
     private List<CharacterRecord> characterRecords = new ArrayList<>();
 
-    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
     @ToString.Exclude
     @Builder.Default
     private List<EquipmentRecord> equipmentRecords = new ArrayList<>();
 
-    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
     @ToString.Exclude
     @Builder.Default
     private List<ItemRecord> itemRecords = new ArrayList<>();
 
-    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
     @ToString.Exclude
     @Builder.Default
     private List<StructureRecord> structureRecords = new ArrayList<>();
 
-    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
     @ToString.Exclude
     @Builder.Default
     private List<MountRecord> mountRecords = new ArrayList<>();

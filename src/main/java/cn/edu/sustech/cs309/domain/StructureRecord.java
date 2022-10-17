@@ -1,5 +1,6 @@
 package cn.edu.sustech.cs309.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,13 +32,18 @@ public class StructureRecord {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updateTime;
 
+    @JsonBackReference
+    @ManyToOne
+    @JoinColumn(name = "player_id")
+    private Player player;
+
     @Column(name = "structure_class", nullable = false)
     @Enumerated(EnumType.STRING)
     private StructureClass structureClass;
 
     private Integer level;
 
-    @Column(name="ramining_round")
+    @Column(name="remaining_round")
     private Integer remainingRound;
 
     private Integer value;
@@ -45,12 +51,6 @@ public class StructureRecord {
     private Integer x;
 
     private Integer y;
-    @ManyToOne
-    @JoinColumn(name = "game_id")
-    private Game game;
 
     private String character;
-    @ManyToOne
-    @JoinColumn(name = "player_id")
-    private Player player;
 }

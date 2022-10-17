@@ -1,6 +1,7 @@
 package cn.edu.sustech.cs309.domain;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -44,7 +45,8 @@ public class Mount {
 
     private String description;
 
-    @OneToMany(mappedBy = "mount", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    @OneToMany(mappedBy = "mount", cascade = CascadeType.REMOVE)
     @ToString.Exclude
     @Builder.Default
     private List<MountRecord> mountRecords = new ArrayList<>();

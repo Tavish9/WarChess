@@ -31,11 +31,6 @@ public class ShopRecord {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updateTime;
 
-
-    @ManyToOne
-    @JoinColumn(name = "game_id")
-    private Game game;
-
     private Integer round;
 
     private String name;

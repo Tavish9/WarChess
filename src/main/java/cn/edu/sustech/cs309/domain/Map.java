@@ -1,6 +1,7 @@
 package cn.edu.sustech.cs309.domain;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -34,11 +35,11 @@ public class Map {
 
     private String name;
 
-    @OneToMany(mappedBy = "map", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonIgnore
+    @OneToMany(mappedBy = "map", cascade = CascadeType.REMOVE)
     @ToString.Exclude
     @Builder.Default
     private List<Game> games = new ArrayList<>();
-
 
     private String data;
 }

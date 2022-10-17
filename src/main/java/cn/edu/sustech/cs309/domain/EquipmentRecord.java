@@ -1,6 +1,7 @@
 package cn.edu.sustech.cs309.domain;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -34,20 +35,14 @@ public class EquipmentRecord {
     private Date updateTime;
 
     @ManyToOne
-    @JoinColumn(name = "game_id")
-    private Game game;
-
-    @ManyToOne
     @JoinColumn(name = "equipment_id")
     private Equipment equipment;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "player_id")
     private Player player;
 
-    private Integer number;
-
-//    @ManyToOne
-//    @JoinColumn(name = "character_record_id")
-//    private CharacterRecord characterRecord;
+    @Builder.Default
+    private Boolean used = false;
 }

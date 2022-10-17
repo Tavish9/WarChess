@@ -1,5 +1,6 @@
 package cn.edu.sustech.cs309.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -45,6 +46,7 @@ public class Account {
     @Builder.Default
     private List<Archive> archives = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @Builder.Default

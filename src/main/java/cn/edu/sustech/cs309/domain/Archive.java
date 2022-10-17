@@ -1,6 +1,7 @@
 package cn.edu.sustech.cs309.domain;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,6 +33,7 @@ public class Archive {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updateTime;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "account_id")
     private Account account;

@@ -1,5 +1,6 @@
 package cn.edu.sustech.cs309.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -41,7 +42,8 @@ public class Item {
 
     private Integer defense;
 
-    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    @OneToMany(mappedBy = "item", cascade = CascadeType.REMOVE)
     @ToString.Exclude
     @Builder.Default
     private List<ItemRecord> itemRecords = new ArrayList<>();
