@@ -53,16 +53,14 @@ public class Player {
 
 
     @Column(name = "techtree_feasible")
-    @Transient
-    private List<Integer> techtreeFeasible;
+    private String techtreeFeasible;
 
     @Column(name = "techtree_light")
-    @Transient
-    private List<Integer> techtreeLight;
+    private String techtreeLight;
 
 
     @Transient
-    private List<List<Integer>> vision;
+    private String vision;
 
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude

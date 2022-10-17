@@ -31,6 +31,9 @@ public class StructureRecord {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updateTime;
 
+    @Column(name = "structure_class", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private StructureClass structureClass;
 
     private Integer level;
 
@@ -46,10 +49,7 @@ public class StructureRecord {
     @JoinColumn(name = "game_id")
     private Game game;
 
-    @ManyToOne
-    @JoinColumn(name = "structure_id")
-    private Structure structure;
-
+    private String character;
     @ManyToOne
     @JoinColumn(name = "player_id")
     private Player player;

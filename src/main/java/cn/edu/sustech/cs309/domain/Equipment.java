@@ -33,6 +33,8 @@ public class Equipment {
 
     private String name;
 
+    private Integer cost;
+
     @Column(name = "equipment_class")
     @Enumerated(EnumType.STRING)
     private EquipmentClass equipmentClass;

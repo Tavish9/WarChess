@@ -39,9 +39,9 @@ public class CharacterRecord {
     @JoinColumn(name = "player_id")
     private Player player;
 
-    @ManyToOne
-    @JoinColumn(name = "character_id")
-    private Character character;
+//    @ManyToOne
+//    @JoinColumn(name = "character_id")
+//    private Character character;
 
 
     @Column(name = "character_class", nullable = false)

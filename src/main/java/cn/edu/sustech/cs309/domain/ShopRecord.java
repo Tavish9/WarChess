@@ -1,23 +1,24 @@
 package cn.edu.sustech.cs309.domain;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 @Entity
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "character")
+@Table(name = "shop_record")
 @EntityListeners(AuditingEntityListener.class)
-public class Character {
+public class ShopRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -30,23 +31,24 @@ public class Character {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updateTime;
 
-    @Column(nullable = false)
+
+    @ManyToOne
+    @JoinColumn(name = "game_id")
+    private Game game;
+
+    private Integer round;
+
     private String name;
-
-    private double attack;
-
-    private double defense;
-
-    private double hp;
-
-    @Column(name="action_range")
-    private Integer actionRange;
 
     private String description;
 
-    @OneToMany(mappedBy = "character", cascade = CascadeType.ALL, orphanRemoval = true)
-    @ToString.Exclude
-    @Builder.Default
-    private List<CharacterRecord> characterRecords = new ArrayList<>();
+    @Column(name = "shop_class", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ShopClass shopClass;
 
+    private Integer cost;
+
+    private Integer propid;
+
+    private Boolean purchased;
 }

@@ -39,6 +39,6 @@ public class Map {
     @Builder.Default
     private List<Game> games = new ArrayList<>();
 
-    @Transient
-    private List<List<Integer>> data;
+
+    private String data;
 }
