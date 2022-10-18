@@ -7,6 +7,7 @@ import cn.edu.sustech.cs309.dto.AccountDTO;
 import cn.edu.sustech.cs309.security.MyPasswordEncoder;
 import cn.edu.sustech.cs309.service.AccountService;
 import cn.edu.sustech.cs309.repository.AccountRepository;
+import cn.edu.sustech.cs309.utils.DTOUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.websocket.AuthenticationException;
@@ -28,29 +29,29 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
 
     @Override
     public AccountDTO createAccount(String username, String password) {
-        Account account1 = accountRepository.findAccountByUsername(username);
-        if (account1 != null) {
+        Account account = accountRepository.findAccountByUsername(username);
+        if (account != null) {
             throw new RuntimeException("Username already exists");
         } else {
-            Account account = Account.builder().username(username).password(passwordEncoder.encode(password)).build();
+            account = Account.builder().username(username).password(passwordEncoder.encode(password)).build();
             log.debug("create account: " + account);
             account = accountRepository.save(account);
-            return new AccountDTO(account.getId(), account.getUsername(), null);
+            return DTOUtil.toAccountDTO(account, null);
         }
     }
 
     @Override
     public AccountDTO updatePassword(String username, String oldPassword, String newPassword) throws AuthenticationException {
-        Account account1 = accountRepository.findAccountByUsername(username);
-        if (account1 == null) {
+        Account account = accountRepository.findAccountByUsername(username);
+        if (account == null) {
             throw new UsernameNotFoundException("Account does not exist");
-        } else if (!passwordEncoder.matches(oldPassword, account1.getPassword())) {
+        } else if (!passwordEncoder.matches(oldPassword, account.getPassword())) {
             throw new AuthenticationException("Wrong password");
         } else {
-            account1.setPassword(passwordEncoder.encode(newPassword));
-            log.debug("update password:" + account1);
-            account1 = accountRepository.save(account1);
-            return new AccountDTO(account1.getId(), account1.getUsername(), null);
+            account.setPassword(passwordEncoder.encode(newPassword));
+            log.debug("update password:" + account);
+            account = accountRepository.save(account);
+            return DTOUtil.toAccountDTO(account, null);
         }
     }
 
