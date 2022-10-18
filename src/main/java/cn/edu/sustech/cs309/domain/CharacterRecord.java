@@ -41,6 +41,8 @@ public class CharacterRecord {
     @Enumerated(EnumType.STRING)
     private CharacterClass characterClass;
 
+    private String name;
+
     @Builder.Default
     private Integer level = 1;
 
