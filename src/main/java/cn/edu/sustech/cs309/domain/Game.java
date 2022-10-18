@@ -34,11 +34,11 @@ public class Game {
 
     @OneToOne
     @JoinColumn(name = "player1_id")
-    private Player player1id;
+    private Player player1;
 
     @OneToOne
     @JoinColumn(name = "player2_id")
-    private Player player2id;
+    private Player player2;
 
     //false means player1 first,otherwise player2 first
     private Boolean playerFirst;
