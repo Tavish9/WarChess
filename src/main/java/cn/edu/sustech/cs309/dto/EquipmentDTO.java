@@ -7,6 +7,6 @@ import lombok.Getter;
 import java.io.Serializable;
 
 public record EquipmentDTO(Integer id, String name, EquipmentClass equipmentClass,
-                           double attack, double defense, double hp,
+                           int attack, int defense, int hp, int attackRange,
                            String description) implements Serializable {
 }

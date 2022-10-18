@@ -35,10 +35,10 @@ public class Mount {
     private String name;
 
     @Builder.Default
-    private double attack = 0;
+    private Integer attack = 0;
 
     @Builder.Default
-    private double defense = 0;
+    private Integer defense = 0;
 
     @Column(name="action_range")
     private Integer actionRange;
