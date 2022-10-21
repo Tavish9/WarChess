@@ -58,7 +58,6 @@ public class Player {
     @Column(name = "techtree_light")
     private String techtreeLight;
 
-    @Transient
     private String vision;
 
     @JsonManagedReference
