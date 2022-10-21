@@ -8,5 +8,7 @@ import org.apache.tomcat.websocket.AuthenticationException;
 public interface AccountService {
     AccountDTO createAccount(String username, String password);
 
+    AccountDTO checkAccount(String username, String password);
+
     AccountDTO updatePassword(String username, String oldPassword, String newPassword) throws AuthenticationException;
 }

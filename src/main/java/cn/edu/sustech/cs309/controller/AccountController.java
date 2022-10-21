@@ -23,11 +23,25 @@ public class AccountController {
         if (!username.matches("[A-z0-9]{6,}")) {
             throw new RuntimeException("Username should be a combination of letters and digits with length longer than 5");
         }
-        if (!username.matches("[A-z0-9]{6,16}")) {
+        if (!password.matches("[A-z0-9]{6,16}")) {
             throw new RuntimeException("Password length is 6-16 digits or letters");
         }
         return ResponseResult.success(accountService.createAccount(username, password));
     }
 
+    @ApiOperation(value="用户登录")
+    @PostMapping("/login")
+    public ResponseResult<?>login(@RequestParam(value="username")String username,
+                                  @RequestParam(value="password")String password){
+        return ResponseResult.success(accountService.checkAccount(username,password));
+    }
 
+    public ResponseResult<?>updatePassword(@RequestParam(value="username")String username,
+                                  @RequestParam(value="old_password")String oldPassword,
+                                  @RequestParam(value="new_password")String newPassword){
+        if (!newPassword.matches("[A-z0-9]{6,16}")) {
+            throw new RuntimeException("New password length is 6-16 digits or letters");
+        }
+        return ResponseResult.success(accountService.updatePassword(username,oldPassword,newPassword));
+    }
 }
