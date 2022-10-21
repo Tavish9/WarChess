@@ -29,13 +29,6 @@ public class AccountController {
         return ResponseResult.success(accountService.createAccount(username, password));
     }
 
-    @ApiOperation(value="用户登录")
-    @PostMapping("/login")
-    public ResponseResult<?>login(@RequestParam(value="username")String username,
-                                  @RequestParam(value="password")String password){
-        return ResponseResult.success(accountService.checkAccount(username,password));
-    }
-
     @ApiOperation(value="修改密码")
     @PostMapping("/password")
     public ResponseResult<?>updatePassword(@RequestParam(value="username")String username,
