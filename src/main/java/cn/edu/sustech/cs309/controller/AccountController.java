@@ -36,6 +36,8 @@ public class AccountController {
         return ResponseResult.success(accountService.checkAccount(username,password));
     }
 
+    @ApiOperation(value="修改密码")
+    @PostMapping("/password")
     public ResponseResult<?>updatePassword(@RequestParam(value="username")String username,
                                   @RequestParam(value="old_password")String oldPassword,
                                   @RequestParam(value="new_password")String newPassword){
