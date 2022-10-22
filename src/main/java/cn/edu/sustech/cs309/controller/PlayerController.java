@@ -65,4 +65,42 @@ public class PlayerController {
     public ResponseResult<?> getTechnologies(@PathVariable("playerid")Integer playerId){
         return ResponseResult.success(playerService.getTechnologies(playerId));
     }
+
+    @ApiOperation(value="获取players商店对应的装备")
+    @GetMapping("/player/{playerid}/equip")
+    public ResponseResult<?> getEquipments(@PathVariable("playerid")Integer playerId){
+        return ResponseResult.success(playerService.getEquipments(playerId));
+    }
+    @ApiOperation(value="获取players商店对应的坐骑")
+    @GetMapping("/player/{playerid}/mount")
+    public ResponseResult<?> getMounts(@PathVariable("playerid")Integer playerId){
+        return ResponseResult.success(playerService.getMounts(playerId));
+    }
+
+    @ApiOperation(value="购买players商店对应的道具")
+    @GetMapping("/player/{playerid}/item")
+    public ResponseResult<?> getItems(@PathVariable("playerid")Integer playerId){
+        return ResponseResult.success(playerService.getItems(playerId));
+    }
+
+
+    @ApiOperation(value="购买players商店对应的装备")
+    @PutMapping("/player/{playerid}/equip")
+    public ResponseResult<?> buyEquipments(@PathVariable("playerid")Integer playerId,
+                                           @RequestParam("equipmentid")Integer equipmentId){
+        return ResponseResult.success(playerService.buyEquipments(playerId,equipmentId));
+    }
+    @ApiOperation(value="购买players商店对应的坐骑")
+    @PutMapping("/player/{playerid}/mount")
+    public ResponseResult<?> buyMounts(@PathVariable("playerid")Integer playerId,
+                                       @RequestParam("mountid")Integer mountId){
+        return ResponseResult.success(playerService.buyMounts(playerId,mountId));
+    }
+
+    @ApiOperation(value="购买players商店对应的道具")
+    @PutMapping("/player/{playerid}/item")
+    public ResponseResult<?> buyItems(@PathVariable("playerid")Integer playerId,
+                                      @RequestParam("itemid")Integer itemId){
+        return ResponseResult.success(playerService.buyItems(playerId,itemId));
+    }
 }
