@@ -1,5 +1,6 @@
 package cn.edu.sustech.cs309.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -46,4 +47,10 @@ public class ShopRecord {
     private Integer propid;
 
     private Boolean purchased;
+
+
+    @JsonBackReference
+    @ManyToOne
+    @JoinColumn(name = "player_id")
+    private Player player;
 }

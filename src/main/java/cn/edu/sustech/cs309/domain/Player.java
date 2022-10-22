@@ -89,4 +89,12 @@ public class Player {
     @ToString.Exclude
     @Builder.Default
     private List<MountRecord> mountRecords = new ArrayList<>();
+
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    @Builder.Default
+    private List<ShopRecord> shopRecords = new ArrayList<>();
+
 }
