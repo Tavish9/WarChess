@@ -38,20 +38,8 @@ public class GameRecord {
     private Integer round;
 
     @Lob
-    private String player;
+    private String player1;
 
     @Lob
-    private String character;
-
-    @Lob
-    private String equipment;
-
-    @Lob
-    private String item;
-
-    @Lob
-    private String mount;
-
-    @Lob
-    private String structure;
+    private String player2;
 }
