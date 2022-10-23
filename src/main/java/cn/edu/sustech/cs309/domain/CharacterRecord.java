@@ -41,6 +41,9 @@ public class CharacterRecord {
     @Enumerated(EnumType.STRING)
     private CharacterClass characterClass;
 
+    @Column(name="action_state")
+    private Integer actionState;
+
     private String name;
 
     @Builder.Default

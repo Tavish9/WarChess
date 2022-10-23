@@ -1,6 +1,7 @@
 package cn.edu.sustech.cs309.controller;
 
 import cn.edu.sustech.cs309.domain.ResponseResult;
+import cn.edu.sustech.cs309.dto.AccountDTO;
 import cn.edu.sustech.cs309.service.AccountService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -18,7 +19,7 @@ public class AccountController {
 
     @ApiOperation(value = "用户注册")
     @PostMapping("/register")
-    public ResponseResult<?> register(@RequestParam(value = "username") String username,
+    public ResponseResult<AccountDTO> register(@RequestParam(value = "username") String username,
                                                @RequestParam(value = "password") String password) {
         if (!username.matches("[A-z0-9]{6,}")) {
             throw new RuntimeException("Username should be a combination of letters and digits with length longer than 5");
@@ -29,14 +30,14 @@ public class AccountController {
         return ResponseResult.success(accountService.createAccount(username, password));
     }
 
-    @ApiOperation(value="修改密码")
-    @PostMapping("/password")
-    public ResponseResult<?>updatePassword(@RequestParam(value="username")String username,
-                                  @RequestParam(value="old_password")String oldPassword,
-                                  @RequestParam(value="new_password")String newPassword){
-        if (!newPassword.matches("[A-z0-9]{6,16}")) {
-            throw new RuntimeException("New password length is 6-16 digits or letters");
-        }
-        return ResponseResult.success(accountService.updatePassword(username,oldPassword,newPassword));
-    }
+//    @ApiOperation(value="修改密码")
+//    @PostMapping("/password")
+//    public ResponseResult<?>updatePassword(@RequestParam(value="username")String username,
+//                                  @RequestParam(value="old_password")String oldPassword,
+//                                  @RequestParam(value="new_password")String newPassword){
+//        if (!newPassword.matches("[A-z0-9]{6,16}")) {
+//            throw new RuntimeException("New password length is 6-16 digits or letters");
+//        }
+//        return ResponseResult.success(accountService.updatePassword(username,oldPassword,newPassword));
+//    }
 }

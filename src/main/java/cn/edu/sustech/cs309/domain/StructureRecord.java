@@ -43,6 +43,8 @@ public class StructureRecord {
 
     private Integer level;
 
+    private Integer hp;
+
     @Column(name="remaining_round")
     private Integer remainingRound;
 
