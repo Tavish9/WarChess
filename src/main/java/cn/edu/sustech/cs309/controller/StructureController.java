@@ -21,10 +21,16 @@ public class StructureController {
     @Autowired
     private StructureService structureService;
 
+    @ApiOperation(value="获取建筑信息")
+    @GetMapping("/structure/{structureid}")
+    public ResponseResult<?> getStructure(@PathVariable("structureid")Integer structureId){
+        return ResponseResult.success(structureService.getStructure(structureId));
+    }
+
     @ApiOperation(value="获取建筑内角色列表")
     @GetMapping("/structure/{structureid}/char")
     public ResponseResult<?> getCharacters(@PathVariable("structureid")Integer structureId){
-        return ResponseResult.success(structureService.getcCharacters(structureId));
+        return ResponseResult.success(structureService.getCharacters(structureId));
     }
 
     @ApiOperation(value="购买建筑内的角色")

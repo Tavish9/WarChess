@@ -5,4 +5,5 @@ public enum StructureClass {
     CAMP,
     MARKET,
     INSTITUTE,
+    RELIC,
 }
