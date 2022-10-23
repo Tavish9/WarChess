@@ -35,7 +35,7 @@ public class Archive {
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "account_id")
+    @JoinColumn(name = "account_id", unique = true)
     private Account account;
 
     @OneToOne

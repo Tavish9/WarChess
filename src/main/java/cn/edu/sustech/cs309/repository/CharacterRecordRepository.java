@@ -12,4 +12,8 @@ public interface CharacterRecordRepository extends JpaRepository<CharacterRecord
     CharacterRecord findCharacterRecordById(Integer id);
 
     List<CharacterRecord> findCharacterRecordsByPlayer(Player player);
+
+    Integer countByPlayer(Player player);
+
+    Integer countByPlayerAndHpEquals(Player player, Integer hp);
 }
