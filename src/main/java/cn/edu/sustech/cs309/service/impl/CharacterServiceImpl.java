@@ -35,6 +35,19 @@ public class CharacterServiceImpl implements CharacterService {
     }
 
     @Override
+    public CharacterDTO dismissCharacter(Integer characterId){
+        CharacterRecord characterRecord = characterRecordRepository.findCharacterRecordById(characterId);
+        if (characterRecord != null) {
+            //TODO:check
+            characterRecord = null;
+            characterRecord = characterRecordRepository.save(characterRecord);
+            return DTOUtil.toCharacterDTO(characterRecord);
+        }
+        else
+            throw new RuntimeException("character does not exist");
+    }
+
+    @Override
     public CharacterDTO moveCharacter(Integer characterId, Integer x, Integer y) {
         CharacterRecord characterRecord = characterRecordRepository.findCharacterRecordById(characterId);
         if (characterRecord == null)

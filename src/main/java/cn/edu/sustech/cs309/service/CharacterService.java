@@ -6,7 +6,8 @@ import cn.edu.sustech.cs309.dto.CharacterDTO;
 public interface CharacterService {
 
     CharacterDTO getCharacter(Integer characterId);
-q
+
+    CharacterDTO dismissCharacter(Integer characterId);
     CharacterDTO moveCharacter(Integer characterId,Integer x,Integer y);
 
     CharacterDTO attackCharacter(Integer characterId,Integer attackId);
