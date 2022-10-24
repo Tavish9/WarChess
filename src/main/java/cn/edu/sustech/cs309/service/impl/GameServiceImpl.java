@@ -89,6 +89,9 @@ public class GameServiceImpl implements GameService {
         Player player2 = Player.builder().account(Objects.requireNonNullElse(account2, account1)).game(game).build();
         playerRepository.save(player1);
         playerRepository.save(player2);
+        game.setPlayer1(player1);
+        game.setPlayer2(player2);
+        gameRepository.save(game);
         return DTOUtil.toGameDTO(player1, player2, 1, game.getPlayerFirst());
     }
 
@@ -98,7 +101,35 @@ public class GameServiceImpl implements GameService {
         if (player1 == null) {
             throw new RuntimeException("Player does not exist");
         }
-        // TODO calculation
+        player1.setProsperityDegree(prosperityDegree(player1));
+        player1.setPeaceDegree(peaceDegree(player1));
+        String techTreeRemainRound = player1.getTechtreeRemainRound();
+        String[] remainCnt = techTreeRemainRound.split(", ");
+        String techTreeLight = player1.getTechtreeLight();
+        String[] light = techTreeLight.split(", ");
+        StringBuilder newTechTreeRemainRound = new StringBuilder();
+        StringBuilder newTechTreeLight = new StringBuilder();
+        for (int i = 0; i < remainCnt.length; i++) {
+            int c = Integer.parseInt(remainCnt[i]);
+            if (c == 0)
+                newTechTreeLight.append(light[i]).append(", ");
+            else {
+                c--;
+                if (c == 0)
+                    newTechTreeLight.append("1").append(", ");
+                else
+                    newTechTreeLight.append("0").append(", ");
+            }
+            newTechTreeRemainRound.append(c).append(", ");
+        }
+        player1.setTechtreeRemainRound(newTechTreeRemainRound.substring(0, newTechTreeRemainRound.length() - 2));
+        player1.setTechtreeLight(newTechTreeLight.substring(0, newTechTreeLight.length() - 2));
+        playerRepository.save(player1);
+        List<StructureRecord> player1Structures = structureRecordRepository.findStructureRecordByPlayerAndHpGreaterThan(player1, 0);
+        for (StructureRecord s : player1Structures) {
+            if (s.getRemainingRound() > 0)
+                s.setRemainingRound(s.getRemainingRound() - 1);
+        }
         Game game = player1.getGame();
         GameRecord last = gameRecordRepository.findFirstByGameOrderByIdDesc(game);
         int round;
@@ -113,27 +144,32 @@ public class GameServiceImpl implements GameService {
         if (player1.getId().equals(game.getPlayer1().getId())) {
             currentPlayer = true;
             player2 = game.getPlayer2();
+            player2.setProsperityDegree(prosperityDegree(player2));
+            player2.setProsperityDegree(prosperityDegree(player2));
             gameRecord.setPlayer1(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(player1));
             gameRecord.setPlayer2(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(player2));
         } else {
             currentPlayer = false;
             player2 = game.getPlayer1();
+            player2.setProsperityDegree(prosperityDegree(player2));
+            player2.setProsperityDegree(prosperityDegree(player2));
             gameRecord.setPlayer1(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(player2));
             gameRecord.setPlayer2(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(player1));
         }
+        playerRepository.save(player2);
         gameRecordRepository.save(gameRecord);
         return DTOUtil.toGameDTO(game.getPlayer1(), game.getPlayer2(), round, currentPlayer);
     }
 
     private int prosperityDegree(Player player) {
-        int structureCount = structureRecordRepository.countByPlayer(player);
-        int structureLevel = structureRecordRepository.getSumLevel(player.getId());
+        int structureCount = Objects.requireNonNullElse(structureRecordRepository.countByPlayerAndHpGreaterThan(player, 0), 0);
+        int structureLevel = Objects.requireNonNullElse(structureRecordRepository.getSumLevel(player.getId()), 0);
         return 3 * structureCount + 2 * structureLevel;
     }
 
     private int peaceDegree(Player player) {
-        int allCharacter = characterRecordRepository.countByPlayer(player);
-        int deadCharacter = characterRecordRepository.countByPlayerAndHpEquals(player, 0);
+        int allCharacter = Objects.requireNonNullElse(characterRecordRepository.countByPlayer(player), 0);
+        int deadCharacter = Objects.requireNonNullElse(characterRecordRepository.countByPlayerAndHpEquals(player, 0), 0);
         return allCharacter - deadCharacter;
     }
 }

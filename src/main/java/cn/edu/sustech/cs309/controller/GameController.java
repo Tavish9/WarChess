@@ -44,7 +44,9 @@ public class GameController {
 
     @ApiOperation(value = "下一回合")
     @PutMapping("/game/play")
-    public ResponseResult<?> update(Integer playerId){
-        return ResponseResult.success(null);
+    public ResponseResult<?> update(Integer playerId) throws JsonProcessingException {
+        if (playerId <= 0)
+            throw new RuntimeException("Invalid player");
+        return ResponseResult.success(gameService.update(playerId));
     }
 }

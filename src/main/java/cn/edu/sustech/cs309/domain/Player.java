@@ -58,6 +58,9 @@ public class Player {
     @Column(name = "techtree_light")
     private String techtreeLight;
 
+    @Column(name = "techtree_remain_round")
+    private String techtreeRemainRound;
+
     private String vision;
 
     @JsonManagedReference
