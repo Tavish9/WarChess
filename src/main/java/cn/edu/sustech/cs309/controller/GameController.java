@@ -19,7 +19,7 @@ public class GameController {
 
     @ApiOperation(value = "获取存档")
     @GetMapping("/game/archive")
-    public ResponseResult<?> getArchives(@RequestParam(value = "accountid") String username) throws JsonProcessingException {
+    public ResponseResult<?> getArchives(@RequestParam(value = "username") String username) throws JsonProcessingException {
         if (StringUtils.hasText(username))
             throw new RuntimeException("Invalid account username");
         return ResponseResult.success(gameService.getArchives(username));

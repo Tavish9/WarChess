@@ -1,7 +1,8 @@
 package cn.edu.sustech.cs309.service.impl;
 
 import cn.edu.sustech.cs309.domain.*;
-import cn.edu.sustech.cs309.dto.*;
+import cn.edu.sustech.cs309.dto.ArchiveDTO;
+import cn.edu.sustech.cs309.dto.GameDTO;
 import cn.edu.sustech.cs309.repository.*;
 import cn.edu.sustech.cs309.service.GameService;
 import cn.edu.sustech.cs309.utils.DTOUtil;

@@ -1,18 +1,14 @@
 package cn.edu.sustech.cs309.service.impl;
 
-import cn.edu.sustech.cs309.domain.Account;
+import cn.edu.sustech.cs309.domain.CharacterRecord;
 import cn.edu.sustech.cs309.domain.StructureRecord;
-import cn.edu.sustech.cs309.repository.StructureRecordRepository;
-import cn.edu.sustech.cs309.utils.DTOUtil;
 import cn.edu.sustech.cs309.dto.CharacterDTO;
 import cn.edu.sustech.cs309.repository.CharacterRecordRepository;
+import cn.edu.sustech.cs309.repository.StructureRecordRepository;
 import cn.edu.sustech.cs309.service.CharacterService;
-import cn.edu.sustech.cs309.domain.CharacterRecord;
+import cn.edu.sustech.cs309.utils.DTOUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.CachedIntrospectionResults;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -35,15 +31,14 @@ public class CharacterServiceImpl implements CharacterService {
     }
 
     @Override
-    public CharacterDTO dismissCharacter(Integer characterId){
+    public CharacterDTO dismissCharacter(Integer characterId) {
         CharacterRecord characterRecord = characterRecordRepository.findCharacterRecordById(characterId);
         if (characterRecord != null) {
             //TODO:check
             characterRecord = null;
             characterRecord = characterRecordRepository.save(characterRecord);
             return DTOUtil.toCharacterDTO(characterRecord);
-        }
-        else
+        } else
             throw new RuntimeException("character does not exist");
     }
 
@@ -99,15 +94,15 @@ public class CharacterServiceImpl implements CharacterService {
             throw new RuntimeException("attacker is dead");
         if (structure == null)
             throw new RuntimeException("character attacked does not exist");
-        if (structure.getPlayer()==character.getPlayer())
+        if (structure.getPlayer() == character.getPlayer())
             throw new RuntimeException("can not attack structure in same camp");
         if (character.getActionState() == 2)
             throw new RuntimeException("character can't attack in this round");
         character.setActionState(2);
-        character=characterRecordRepository.save(character);
+        character = characterRecordRepository.save(character);
 
-        Integer newHp = structure.getHp()-character.getAttack();
-        if (newHp>0)
+        int newHp = structure.getHp() - character.getAttack();
+        if (newHp > 0)
             structure.setHp(newHp);
         else {
             structure.setHp(1);

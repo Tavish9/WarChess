@@ -1,6 +1,5 @@
 package cn.edu.sustech.cs309.service.impl;
 
-import cn.edu.sustech.cs309.domain.CharacterRecord;
 import cn.edu.sustech.cs309.domain.Player;
 import cn.edu.sustech.cs309.domain.StructureClass;
 import cn.edu.sustech.cs309.domain.StructureRecord;
@@ -34,36 +33,38 @@ public class StructureServiceImpl implements StructureService {
 
     @Override
     public StructureDTO getStructure(Integer structureId) throws JsonProcessingException {
-        StructureRecord structureRecord=structureRecordRepository.findStructureRecordById(structureId);
+        StructureRecord structureRecord = structureRecordRepository.findStructureRecordById(structureId);
         if (structureRecord != null)
             return DTOUtil.toStructureDTO(structureRecord);
         else
             throw new RuntimeException("Structure does not exist");
     }
+
     @Override
     public StructureDTO getCharacters(Integer structureId) throws JsonProcessingException {
-        StructureRecord structureRecord=structureRecordRepository.findStructureRecordById(structureId);
+        StructureRecord structureRecord = structureRecordRepository.findStructureRecordById(structureId);
         if (structureRecord != null)
             return DTOUtil.toStructureDTO(structureRecord);
         else
             throw new RuntimeException("Structure does not exist");
     }
+
     @Override
-    public StructureDTO buyCharacter(Integer structureId,Integer playerId,Integer id,Integer x,Integer y) throws JsonProcessingException {
-        Player player=playerRepository.findPlayerById(playerId);
-        if (player==null)
+    public StructureDTO buyCharacter(Integer structureId, Integer playerId, Integer id, Integer x, Integer y) throws JsonProcessingException {
+        Player player = playerRepository.findPlayerById(playerId);
+        if (player == null)
             throw new RuntimeException("player does not exist");
-        if (player.getStars()<3)
+        if (player.getStars() < 3)
             throw new RuntimeException("player does not have enough star");
 
-        StructureRecord structureRecord=structureRecordRepository.findStructureRecordById(structureId);
+        StructureRecord structureRecord = structureRecordRepository.findStructureRecordById(structureId);
         if (structureRecord == null)
             throw new RuntimeException("structure does not exist");
-        if (structureRecord.getStructureClass()== StructureClass.RELIC)
+        if (structureRecord.getStructureClass() == StructureClass.RELIC)
             throw new RuntimeException("can't buy character in relic");
-        StructureDTO structureDTO=DTOUtil.toStructureDTO(structureRecord);
-        List<CharacterDTO>  characterDTOS= structureDTO.characterDTOS();
-        if (id<0 || characterDTOS.size()<=id)
+        StructureDTO structureDTO = DTOUtil.toStructureDTO(structureRecord);
+        List<CharacterDTO> characterDTOS = structureDTO.characterDTOS();
+        if (id < 0 || characterDTOS.size() <= id)
             throw new RuntimeException("character does not exist");
         //TODO:
 
