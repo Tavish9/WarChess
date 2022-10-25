@@ -34,17 +34,15 @@ public class GameController {
     }
 
     @ApiOperation(value = "开始新游戏")
-    @GetMapping("/game/play")
-    public ResponseResult<?> play(String username1, String username2) throws JsonProcessingException {
-        if (!StringUtils.hasText(username1)){
-            throw new RuntimeException("Invalid account username");
-        }
+    @PostMapping("/game/play")
+    public ResponseResult<?> play(@RequestParam(value = "username1") String username1,
+                                  @RequestParam(value = "username2", required = false) String username2) throws JsonProcessingException {
         return ResponseResult.success(gameService.ini(username1, username2));
     }
 
     @ApiOperation(value = "下一回合")
     @PutMapping("/game/play")
-    public ResponseResult<?> update(Integer playerId) throws JsonProcessingException {
+    public ResponseResult<?> update(@RequestParam(value = "playerid") Integer playerId) throws JsonProcessingException {
         if (playerId <= 0)
             throw new RuntimeException("Invalid player");
         return ResponseResult.success(gameService.update(playerId));
