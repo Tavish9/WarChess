@@ -63,7 +63,7 @@ public class StructureServiceImpl implements StructureService {
         if (structureRecord.getStructureClass() == StructureClass.RELIC)
             throw new RuntimeException("can't buy character in relic");
         StructureDTO structureDTO = DTOUtil.toStructureDTO(structureRecord);
-        List<CharacterDTO> characterDTOS = structureDTO.characterDTOS();
+        List<CharacterDTO> characterDTOS = structureDTO.characters();
         if (id < 0 || characterDTOS.size() <= id)
             throw new RuntimeException("character does not exist");
         //TODO:
