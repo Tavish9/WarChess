@@ -53,7 +53,16 @@ public class PlayerServiceImpl implements PlayerService {
         ItemRecord itemRecord = itemRecordRepository.findItemRecordById(itemId);
         if (itemRecord == null)
             throw new RuntimeException("Item does not exist");
-        // TODO
+        if (itemRecord.getUsed())
+            throw new RuntimeException("Item has been used");
+        Item item = itemRecord.getItem();
+        characterRecord.setAttack(characterRecord.getAttack() + item.getAttack());
+        characterRecord.setDefense(characterRecord.getDefense() + item.getDefense());
+        characterRecord.setHp(characterRecord.getHp() + item.getHp());
+        characterRecordRepository.save(characterRecord);
+        itemRecord.setUsed(true);
+        itemRecordRepository.save(itemRecord);
+        log.debug("character " + characterId + "use item " + itemId);
         return DTOUtil.toCharacterDTO(characterRecord);
     }
 
