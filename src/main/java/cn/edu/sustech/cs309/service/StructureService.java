@@ -10,13 +10,13 @@ public interface StructureService {
 
     StructureDTO getCharacters(Integer structureId) throws JsonProcessingException;
 
-    StructureDTO buyCharacter(Integer structureId,Integer playerId,Integer id,Integer x,Integer y) throws JsonProcessingException;
+    StructureDTO buyCharacter(Integer structureId,Integer playerId,Integer id,Integer x,Integer y,Integer type) throws JsonProcessingException;
 
-    StructureDTO updateCharacter(Integer structureId,Integer characterId,Integer v);
+    StructureDTO updateCharacter(Integer structureId,Integer characterId,Integer v) throws JsonProcessingException;
 
-    StructureDTO earnStars(Integer structureId,Integer characterId);
+    StructureDTO earnStars(Integer structureId,Integer characterId) throws JsonProcessingException;
 
-    StructureDTO updateTechnologies(Integer structureId,Integer characterId,Integer v);
+    StructureDTO updateTechnologies(Integer structureId,Integer characterId,Integer v,Integer round) throws JsonProcessingException;
 
-    StructureDTO updateStructure(Integer structureId,Integer v);
+    StructureDTO updateStructure(Integer structureId,Integer v) throws JsonProcessingException;
 }

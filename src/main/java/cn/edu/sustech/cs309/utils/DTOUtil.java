@@ -25,6 +25,10 @@ public class DTOUtil {
         dtoUtil.objectMapper = this.objectMapper;
     }
 
+    public static String toCharacterString(List<CharacterDTO> characterDTOS) throws JsonProcessingException {
+        return dtoUtil.objectMapper.writeValueAsString(characterDTOS);
+    }
+
     public static AccountDTO toAccountDTO(Account account, List<ArchiveDTO> archiveDTOS) {
         return new AccountDTO(account.getId(), account.getUsername(), archiveDTOS);
     }

@@ -36,22 +36,23 @@ public class StructureController {
                                           @RequestParam("playerid") Integer playerid,
                                           @RequestParam("id") Integer id,
                                           @RequestParam("x") Integer x,
-                                          @RequestParam("y") Integer y) throws JsonProcessingException {
-        return ResponseResult.success(structureService.buyCharacter(structureId, playerid, id, x, y));
+                                          @RequestParam("y") Integer y,
+                                          @RequestParam("type")Integer type) throws JsonProcessingException {
+        return ResponseResult.success(structureService.buyCharacter(structureId, playerid, id, x, y,type));
     }
 
     @ApiOperation(value = "兵营训练人物")
     @PutMapping("/structure/{structureid}/camp")
     public ResponseResult<?> updateCharacter(@PathVariable("structureid") Integer structureId,
                                              @RequestParam("characterid") Integer characterId,
-                                             @RequestParam("option") Integer v) {
+                                             @RequestParam("option") Integer v) throws JsonProcessingException {
         return ResponseResult.success(structureService.updateCharacter(structureId, characterId, v));
     }
 
     @ApiOperation(value = "人物放在兵营挣钱")
     @PutMapping("structure/{structureid}/market")
     public ResponseResult<?> earnStars(@PathVariable("structureid") Integer structureId,
-                                       @RequestParam("characterid") Integer characterId) {
+                                       @RequestParam("characterid") Integer characterId) throws JsonProcessingException {
         return ResponseResult.success(structureService.earnStars(structureId, characterId));
     }
 
@@ -59,8 +60,9 @@ public class StructureController {
     @PutMapping("/structure/{structureid}/insititude")
     public ResponseResult<?> updateTechnologies(@PathVariable("structureid") Integer structureId,
                                                 @RequestParam("characterid") Integer characterId,
-                                                @RequestParam("option") Integer v) {
-        return ResponseResult.success(structureService.updateTechnologies(structureId, characterId, v));
+                                                @RequestParam("option") Integer v,
+                                                @RequestParam("round")Integer round) throws JsonProcessingException {
+        return ResponseResult.success(structureService.updateTechnologies(structureId, characterId, v,round));
     }
 
     @ApiOperation(value = "升级建筑")
