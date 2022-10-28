@@ -9,6 +9,7 @@ import cn.edu.sustech.cs309.repository.StructureRecordRepository;
 import cn.edu.sustech.cs309.service.StructureService;
 import cn.edu.sustech.cs309.utils.DTOUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,6 +48,8 @@ public class StructureServiceImpl implements StructureService {
             throw new RuntimeException("Structure does not exist");
     }
 
+    @Autowired
+    private ObjectMapper objectMapper;
     @Override
     public StructureDTO buyCharacter(Integer structureId, Integer playerId, Integer id, Integer x, Integer y,Integer type) throws JsonProcessingException {
         Player player = playerRepository.findPlayerById(playerId);
@@ -71,7 +74,7 @@ public class StructureServiceImpl implements StructureService {
         player=playerRepository.save(player);
         CharacterDTO characterDTO_add= characterDTOS.get(id);
         characterDTOS.remove(id);
-        structureRecord.setCharacter(DTOUtil.toCharacterString(characterDTOS));
+        structureRecord.setCharacter(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(characterDTOS));
         structureRecord=structureRecordRepository.save(structureRecord);
         //todo:set action range
         Integer actionRange=1;
