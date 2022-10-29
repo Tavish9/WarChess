@@ -68,7 +68,7 @@ public class StructureController {
     @ApiOperation(value = "升级建筑")
     @PutMapping("structure/{structureid}/upd")
     public ResponseResult<?> updateStructure(@PathVariable("structureid") Integer structureId,
-                                             @RequestParam("option") Integer v) {
+                                             @RequestParam("option") Integer v) throws JsonProcessingException{
         return ResponseResult.success(structureService.updateStructure(structureId, v));
     }
 

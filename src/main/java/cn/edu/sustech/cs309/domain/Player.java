@@ -8,9 +8,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.Map;
 
 @Entity
 @Data
@@ -55,13 +54,23 @@ public class Player {
     @Column(name = "techtree_feasible")
     private String techtreeFeasible;
 
-    @Column(name = "techtree_light")
-    private String techtreeLight;
-
     @Column(name = "techtree_remain_round")
     private String techtreeRemainRound;
 
     private String vision;
+
+    @Transient
+    @Builder.Default
+    public static final Map<String, int[]> map = new HashMap<>();
+
+    static {
+        String[] name = {"Life", "Horse", "Fish", "Sword", "Elephant", "Fox", "Bear", "Potion", "Arrow", "Shield", "Cannon"};
+        int[] round = {0, 2, 2, 2, 3, 3, 3, 3, 3, 3, 5};
+        int[] stars = {0, 4, 4, 4, 10, 10, 10, 10, 10, 10, 20};
+        for (int i = 0; i < name.length; i++) {
+            map.put(name[i], new int[]{round[i], stars[i]});
+        }
+    }
 
     @JsonManagedReference
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
@@ -93,11 +102,22 @@ public class Player {
     @Builder.Default
     private List<MountRecord> mountRecords = new ArrayList<>();
 
-
     @JsonManagedReference
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
     @ToString.Exclude
     @Builder.Default
     private List<ShopRecord> shopRecords = new ArrayList<>();
 
+    public int[][] getTech() {
+        int[][] technologyTree = new int[2][];
+        String techTreeRemainRound = techtreeRemainRound;
+        String techTreeFeasible = techtreeFeasible;
+        String[] remain = techTreeRemainRound.split(", ");
+        String[] feasible = techTreeFeasible.split(", ");
+        int[] r = Arrays.stream(remain).mapToInt(Integer::parseInt).toArray();
+        int[] f = Arrays.stream(feasible).mapToInt(Integer::parseInt).toArray();
+        technologyTree[0] = f;
+        technologyTree[1] = r;
+        return technologyTree;
+    }
 }

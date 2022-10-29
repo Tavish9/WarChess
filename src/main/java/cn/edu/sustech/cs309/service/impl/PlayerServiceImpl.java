@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -153,16 +154,12 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public List<String> getTechnologies(Integer playerId) {
+    public int[][] getTechnologies(Integer playerId) {
         Player player = playerRepository.findPlayerById(playerId);
         if (player == null)
             throw new RuntimeException("Player does not exist");
-        List<String> technology = new ArrayList<>();
-        technology.add(player.getTechtreeLight());
-        technology.add(player.getTechtreeFeasible());
-        technology.add(player.getTechtreeRemainRound());
         log.debug("play " + playerId + "get techTree");
-        return technology;
+        return player.getTech();
     }
 
     @Override

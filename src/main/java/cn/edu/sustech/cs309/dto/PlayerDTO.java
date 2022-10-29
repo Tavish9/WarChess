@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 public record PlayerDTO(Integer id, Long stars, Integer prosperityDegree, Integer peaceDegree,
-                        List<CharacterDTO> characters, List<EquipmentDTO> equipments,
+                        int[][] technologyTree, List<CharacterDTO> characters, List<EquipmentDTO> equipments,
                         List<MountDTO> mounts, List<ItemDTO> items,
                         List<StructureDTO> structures) implements Serializable {
 

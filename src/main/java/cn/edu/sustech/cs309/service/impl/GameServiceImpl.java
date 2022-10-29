@@ -88,6 +88,7 @@ public class GameServiceImpl implements GameService {
         gameRepository.save(game);
         Player player1 = Player.builder().account(account1).game(game).build();
         Player player2 = Player.builder().account(Objects.requireNonNullElse(account2, account1)).game(game).build();
+
         playerRepository.save(player1);
         playerRepository.save(player2);
         game.setPlayer1(player1);
@@ -104,33 +105,73 @@ public class GameServiceImpl implements GameService {
         }
         player1.setProsperityDegree(prosperityDegree(player1));
         player1.setPeaceDegree(peaceDegree(player1));
-        String techTreeRemainRound = player1.getTechtreeRemainRound();
-        String[] remainCnt = techTreeRemainRound.split(", ");
-        String techTreeLight = player1.getTechtreeLight();
-        String[] light = techTreeLight.split(", ");
-        StringBuilder newTechTreeRemainRound = new StringBuilder();
-        StringBuilder newTechTreeLight = new StringBuilder();
-        for (int i = 0; i < remainCnt.length; i++) {
-            int c = Integer.parseInt(remainCnt[i]);
-            if (c == 0)
-                newTechTreeLight.append(light[i]).append(", ");
-            else {
-                c--;
-                if (c == 0)
-                    newTechTreeLight.append("1").append(", ");
-                else
-                    newTechTreeLight.append("0").append(", ");
+
+        /*every round get some star*/
+        player1.setStars(player1.getStars() + 3);
+
+        List<StructureRecord> player1Structures = structureRecordRepository.findStructureRecordByPlayerAndHpGreaterThan(player1, 0);
+        List<CharacterRecord> characterRecords = characterRecordRepository.findCharacterRecordsByPlayer(player1);
+        for (CharacterRecord c : characterRecords) {
+            if (c.getHp() > 0) {
+                c.setActionState(0);
+                characterRecordRepository.save(c);
             }
-            newTechTreeRemainRound.append(c).append(", ");
+        }
+        for (StructureRecord s : player1Structures) {
+            if (s.getRemainingRound() > 0) {
+                if (s.getRemainingRound() == 1) {
+                    if (s.getStructureClass() == StructureClass.CAMP) {
+                        if (s.getValue() == 0) {
+                            //update hp
+                            for (CharacterRecord c : characterRecords) {
+                                if (c.getHp() > 0 && c.getX().equals(s.getX()) && c.getY().equals(s.getY())) {
+                                    c.setHp(c.getHp() + s.getLevel() * 2);
+                                    characterRecordRepository.save(c);
+                                }
+                            }
+                        } else {
+                            //update attack
+                            for (CharacterRecord c : characterRecords) {
+                                if (c.getHp() > 0 && c.getX().equals(s.getX()) && c.getY().equals(s.getY())) {
+                                    c.setAttack(c.getAttack() + s.getLevel() * 2);
+                                    characterRecordRepository.save(c);
+                                }
+                            }
+                        }
+                    } else {
+                        if (s.getStructureClass() == StructureClass.MARKET) {
+                            player1.setStars(player1.getStars() + 5L * s.getLevel());
+                        }
+                    }
+                } else {
+                    for (CharacterRecord c : characterRecords) {
+                        if (c.getHp() > 0 && c.getX().equals(s.getX()) && c.getY().equals(s.getY())) {
+                            c.setActionState(2);
+                            characterRecordRepository.save(c);
+                        }
+                    }
+                }
+                s.setRemainingRound(s.getRemainingRound() - 1);
+            }
+        }
+
+        /*update tech tree*/
+        String techTreeRemainRound = player1.getTechtreeRemainRound();
+        String techTreeFeasible = player1.getTechtreeFeasible();
+        String[] remainCnt = techTreeRemainRound.split(", ");
+        String[] feasibleCnt = techTreeFeasible.split(", ");
+        StringBuilder newTechTreeRemainRound = new StringBuilder();
+        for (int i = 0; i < remainCnt.length; i++) {
+            int r = Integer.parseInt(remainCnt[i]);
+            if (feasibleCnt[i].equals("1")) {
+                if (r != 0)
+                    r--;
+                newTechTreeRemainRound.append(r).append(", ");
+            }
         }
         player1.setTechtreeRemainRound(newTechTreeRemainRound.substring(0, newTechTreeRemainRound.length() - 2));
-        player1.setTechtreeLight(newTechTreeLight.substring(0, newTechTreeLight.length() - 2));
         playerRepository.save(player1);
-        List<StructureRecord> player1Structures = structureRecordRepository.findStructureRecordByPlayerAndHpGreaterThan(player1, 0);
-        for (StructureRecord s : player1Structures) {
-            if (s.getRemainingRound() > 0)
-                s.setRemainingRound(s.getRemainingRound() - 1);
-        }
+
         Game game = player1.getGame();
         GameRecord last = gameRecordRepository.findFirstByGameOrderByIdDesc(game);
         int round;

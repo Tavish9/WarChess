@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class DTOUtil {
@@ -50,7 +49,7 @@ public class DTOUtil {
 
     public static List<CharacterDTO> toCharacterDTOs(List<CharacterRecord> characterRecords) {
         List<CharacterDTO> characterDTOS = new ArrayList<>(characterRecords.size());
-        characterDTOS.addAll(characterRecords.stream().map(DTOUtil::toCharacterDTO).collect(Collectors.toList()));
+        characterDTOS.addAll(characterRecords.stream().map(DTOUtil::toCharacterDTO).toList());
         return characterDTOS;
     }
 
@@ -62,7 +61,7 @@ public class DTOUtil {
 
     public static List<EquipmentDTO> toEquipmentDTOs(List<EquipmentRecord> equipmentRecords) {
         List<EquipmentDTO> equipmentDTOS = new ArrayList<>(equipmentRecords.size());
-        equipmentDTOS.addAll(equipmentRecords.stream().map(DTOUtil::toEquipmentDTO).collect(Collectors.toList()));
+        equipmentDTOS.addAll(equipmentRecords.stream().map(DTOUtil::toEquipmentDTO).toList());
         return equipmentDTOS;
     }
 
@@ -73,7 +72,7 @@ public class DTOUtil {
 
     public static List<ItemDTO> toItemDTOs(List<ItemRecord> itemRecords) {
         List<ItemDTO> itemDTOS = new ArrayList<>(itemRecords.size());
-        itemDTOS.addAll(itemRecords.stream().map(DTOUtil::toItemDTO).collect(Collectors.toList()));
+        itemDTOS.addAll(itemRecords.stream().map(DTOUtil::toItemDTO).toList());
         return itemDTOS;
     }
 
@@ -84,7 +83,7 @@ public class DTOUtil {
 
     public static List<MountDTO> toMountDTOs(List<MountRecord> mountRecords) {
         List<MountDTO> mountDTOS = new ArrayList<>(mountRecords.size());
-        mountDTOS.addAll(mountRecords.stream().map(DTOUtil::toMountDTO).collect(Collectors.toList()));
+        mountDTOS.addAll(mountRecords.stream().map(DTOUtil::toMountDTO).toList());
         return mountDTOS;
     }
 
@@ -110,7 +109,7 @@ public class DTOUtil {
 
     public static PlayerDTO toPlayerDTO(Player player) throws JsonProcessingException {
         return new PlayerDTO(player.getId(), player.getStars(), player.getProsperityDegree(), player.getPeaceDegree(),
-                toCharacterDTOs(player.getCharacterRecords()), toEquipmentDTOs(player.getEquipmentRecords()),
+                player.getTech(), toCharacterDTOs(player.getCharacterRecords()), toEquipmentDTOs(player.getEquipmentRecords()),
                 toMountDTOs(player.getMountRecords()), toItemDTOs(player.getItemRecords()), toStructureDTOs(player.getStructureRecords()));
     }
 

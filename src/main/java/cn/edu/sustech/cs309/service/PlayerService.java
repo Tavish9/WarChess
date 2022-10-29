@@ -18,7 +18,7 @@ public interface PlayerService {
 
     CharacterDTO wearMount(Integer playerId, Integer characterId, Integer mountId);
 
-    List<String> getTechnologies(Integer playerId);
+    int[][] getTechnologies(Integer playerId);
 
     List<EquipmentDTO> getEquipments(Integer playerId);
 

@@ -107,6 +107,8 @@ public class CharacterServiceImpl implements CharacterService {
         else {
             structure.setHp(1);
             structure.setPlayer(character.getPlayer());
+            structure.setValue(0);
+            structure.setRemainingRound(0);
             //TODO:set palyer?
         }
         structureRecordRepository.save(structure);

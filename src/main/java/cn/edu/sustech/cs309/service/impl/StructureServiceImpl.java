@@ -30,6 +30,9 @@ public class StructureServiceImpl implements StructureService {
     @Autowired
     private PlayerRepository playerRepository;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @Override
     public StructureDTO getStructure(Integer structureId) throws JsonProcessingException {
         StructureRecord structureRecord = structureRecordRepository.findStructureRecordById(structureId);
@@ -48,8 +51,6 @@ public class StructureServiceImpl implements StructureService {
             throw new RuntimeException("Structure does not exist");
     }
 
-    @Autowired
-    private ObjectMapper objectMapper;
     @Override
     public StructureDTO buyCharacter(Integer structureId, Integer playerId, Integer id, Integer x, Integer y,Integer type) throws JsonProcessingException {
         Player player = playerRepository.findPlayerById(playerId);
@@ -77,10 +78,10 @@ public class StructureServiceImpl implements StructureService {
         structureRecord.setCharacter(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(characterDTOS));
         structureRecord=structureRecordRepository.save(structureRecord);
         //todo:set action range
-        Integer actionRange=1;
-        Integer attack=characterDTO_add.attack();
-        Integer defense=characterDTO_add.defense();
-        Integer hp=characterDTO_add.hp();
+        int actionRange=1;
+        int attack=characterDTO_add.attack();
+        int defense=characterDTO_add.defense();
+        int hp=characterDTO_add.hp();
 
         CharacterClass characterClass;
         if (type==0) {
@@ -163,17 +164,31 @@ public class StructureServiceImpl implements StructureService {
         if (structureRecord == null)
             throw new RuntimeException("structure does not exist");
         if (structureRecord.getStructureClass()!=StructureClass.INSTITUTE ||structureRecord.getLevel()==0)
-            throw new RuntimeException("struct should be institute to updateTechnologies");
+            throw new RuntimeException("structure should be institute to updateTechnologies");
         if (structureRecord.getRemainingRound() > 0)
             throw new RuntimeException("structure is being used");
         CharacterRecord characterRecord=characterRecordRepository.findCharacterRecordById(characterId);
         if (characterRecord == null)
             throw new RuntimeException("character does not exist");
-        if (characterRecord .getActionState()==2)
+        if (characterRecord.getActionState()==2)
             throw new RuntimeException("character already act");
         if (characterRecord.getCharacterClass()!=CharacterClass.SCHOLAR)
             throw new RuntimeException("character should be scholar to updateTechnologies");
 
+        /*update tech tree*/
+        Player player=structureRecord.getPlayer();
+        String techTreeRemainRound = player.getTechtreeRemainRound();
+        String[] remainCnt = techTreeRemainRound.split(", ");
+        StringBuilder newTechTreeRemainRound = new StringBuilder();
+        for (int i = 0; i < remainCnt.length; i++) {
+            int c = Integer.parseInt(remainCnt[i]);
+            if (i==v)
+                newTechTreeRemainRound.append(1).append(", ");
+            else
+                newTechTreeRemainRound.append(c).append(", ");
+        }
+        player.setTechtreeRemainRound(newTechTreeRemainRound.substring(0, newTechTreeRemainRound.length() - 2));
+        playerRepository.save(player);
 
         characterRecord.setActionState(2);
         characterRecordRepository.save(characterRecord);
