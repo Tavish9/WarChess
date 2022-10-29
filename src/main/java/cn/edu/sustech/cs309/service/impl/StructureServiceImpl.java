@@ -66,19 +66,33 @@ public class StructureServiceImpl implements StructureService {
             throw new RuntimeException("can't buy character in relic");
         StructureDTO structureDTO = DTOUtil.toStructureDTO(structureRecord);
         List<CharacterDTO> characterDTOS = structureDTO.characters();
-        if (id < 0 || characterDTOS.size() <= id)
+        if (id < 0)
             throw new RuntimeException("character does not exist");
         if (type<0 || type>=3)
             throw new RuntimeException("type is wrong");
 
-        player.setStars(player.getStars()-3);
-        player=playerRepository.save(player);
-        CharacterDTO characterDTO_add= characterDTOS.get(id);
-        characterDTOS.remove(id);
+        CharacterDTO characterDTO_add=null;
+        for (CharacterDTO c:characterDTOS) {
+            if (c.id().equals(id)){
+                characterDTO_add=c;
+                break;
+            }
+        }
+        if (characterDTO_add==null){
+            throw new RuntimeException("character_add does not exist");
+        }
+
+        CharacterRecord characterRecord =characterRecordRepository.findCharacterRecordById(id);
+        if (characterRecord==null)
+            throw new RuntimeException("character does not exist");
+
+        characterDTOS.remove(characterDTO_add);
         structureRecord.setCharacter(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(characterDTOS));
         structureRecord=structureRecordRepository.save(structureRecord);
-        //todo:set action range
-        int actionRange=1;
+        player.setStars(player.getStars()-3);
+        player=playerRepository.save(player);
+
+        int actionRange= characterDTO_add.actionRange();
         int attack=characterDTO_add.attack();
         int defense=characterDTO_add.defense();
         int hp=characterDTO_add.hp();
@@ -93,15 +107,19 @@ public class StructureServiceImpl implements StructureService {
         else {
             if (type == 1) {
                 characterClass = CharacterClass.EXPLORER;
-                actionRange = 2;
+                actionRange = actionRange+1;
             }
             else
                 characterClass = CharacterClass.SCHOLAR;
         }
-        CharacterRecord characterRecord = CharacterRecord.builder().characterClass(characterClass)
-                .player(player).actionState(2).name(characterDTO_add.name()).level(1).attack(attack)
-                .defense(defense).hp(hp).actionRange(actionRange)
-                .build();
+        characterRecord.setAttack(attack);
+        characterRecord.setDefense(defense);
+        characterRecord.setHp(hp);
+        characterRecord.setX(x);
+        characterRecord.setY(y);
+        characterRecord.setCharacterClass(characterClass);
+        characterRecord.setLevel(characterDTO_add.level());
+        characterRecord.setActionRange(actionRange);
         log.debug(playerId+"buy a character");
 
         characterRecordRepository.save(characterRecord);
@@ -159,7 +177,7 @@ public class StructureServiceImpl implements StructureService {
     }
 
     @Override
-    public StructureDTO updateTechnologies(Integer structureId, Integer characterId, Integer v ,Integer round) throws JsonProcessingException {
+    public StructureDTO updateTechnologies(Integer structureId, Integer characterId, Integer v) throws JsonProcessingException {
         StructureRecord structureRecord = structureRecordRepository.findStructureRecordById(structureId);
         if (structureRecord == null)
             throw new RuntimeException("structure does not exist");
@@ -174,27 +192,25 @@ public class StructureServiceImpl implements StructureService {
             throw new RuntimeException("character already act");
         if (characterRecord.getCharacterClass()!=CharacterClass.SCHOLAR)
             throw new RuntimeException("character should be scholar to updateTechnologies");
+        if (v < 0 || v > 10)
+            throw new RuntimeException("Index is not valid");
 
-        /*update tech tree*/
         Player player=structureRecord.getPlayer();
-        String techTreeRemainRound = player.getTechtreeRemainRound();
-        String[] remainCnt = techTreeRemainRound.split(", ");
-        StringBuilder newTechTreeRemainRound = new StringBuilder();
-        for (int i = 0; i < remainCnt.length; i++) {
-            int c = Integer.parseInt(remainCnt[i]);
-            if (i==v)
-                newTechTreeRemainRound.append(1).append(", ");
-            else
-                newTechTreeRemainRound.append(c).append(", ");
-        }
-        player.setTechtreeRemainRound(newTechTreeRemainRound.substring(0, newTechTreeRemainRound.length() - 2));
+
+        String techTreeFeasible = player.getTechtreeFeasible();
+        String[] feasible = techTreeFeasible.split(", ");
+        if (feasible[v].equals("0"))
+            throw new RuntimeException("Tree node is not feasible");
+        if (Player.map.get(Player.name[v])[1]> player.getStars())
+            throw new RuntimeException("player does not have enough money");
+        player.setStars(player.getStars()-Player.map.get(Player.name[v])[1]);
         playerRepository.save(player);
 
         characterRecord.setActionState(2);
         characterRecordRepository.save(characterRecord);
 
         structureRecord.setValue(v);
-        structureRecord.setRemainingRound(round);
+        structureRecord.setRemainingRound(Player.map.get(Player.name[v])[0]);
         structureRecord=structureRecordRepository.save(structureRecord);
         return DTOUtil.toStructureDTO(structureRecord);
     }
@@ -207,7 +223,7 @@ public class StructureServiceImpl implements StructureService {
 
         if (structureRecord.getStructureClass()==StructureClass.RELIC)
             throw  new RuntimeException("Relic can not be update");
-        if (structureRecord.getStructureClass()==StructureClass.INSTITUTE)
+        if (structureRecord.getStructureClass()==StructureClass.INSTITUTE && structureRecord.getLevel()==1)
             throw  new RuntimeException("institute can not be update");
         if (structureRecord.getRemainingRound()>0)
             throw new RuntimeException("structure can not be update when be using");
@@ -234,7 +250,7 @@ public class StructureServiceImpl implements StructureService {
         player.setStars(player.getStars()-costMoney);
         playerRepository.save(player);
         structureRecord.setLevel(structureRecord.getLevel()+1);
-
+        structureRecordRepository.save(structureRecord);
         return DTOUtil.toStructureDTO(structureRecord);
     }
 }

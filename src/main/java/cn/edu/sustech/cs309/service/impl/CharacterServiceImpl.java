@@ -1,15 +1,20 @@
 package cn.edu.sustech.cs309.service.impl;
 
 import cn.edu.sustech.cs309.domain.CharacterRecord;
+import cn.edu.sustech.cs309.domain.Player;
+import cn.edu.sustech.cs309.domain.StructureClass;
 import cn.edu.sustech.cs309.domain.StructureRecord;
 import cn.edu.sustech.cs309.dto.CharacterDTO;
 import cn.edu.sustech.cs309.repository.CharacterRecordRepository;
+import cn.edu.sustech.cs309.repository.PlayerRepository;
 import cn.edu.sustech.cs309.repository.StructureRecordRepository;
 import cn.edu.sustech.cs309.service.CharacterService;
 import cn.edu.sustech.cs309.utils.DTOUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
 
 @Slf4j
 @Service
@@ -20,6 +25,9 @@ public class CharacterServiceImpl implements CharacterService {
 
     @Autowired
     private StructureRecordRepository structureRecordRepository;
+
+    @Autowired
+    private PlayerRepository playerRepository;
 
     @Override
     public CharacterDTO getCharacter(Integer characterId) {
@@ -34,8 +42,7 @@ public class CharacterServiceImpl implements CharacterService {
     public CharacterDTO dismissCharacter(Integer characterId) {
         CharacterRecord characterRecord = characterRecordRepository.findCharacterRecordById(characterId);
         if (characterRecord != null) {
-            //TODO:check
-            characterRecord = null;
+            characterRecord.setPlayer(null);
             characterRecord = characterRecordRepository.save(characterRecord);
             return DTOUtil.toCharacterDTO(characterRecord);
         } else
@@ -76,11 +83,14 @@ public class CharacterServiceImpl implements CharacterService {
         characterRecord_attack.setActionState(2);
         characterRecord_attack = characterRecordRepository.save(characterRecord_attack);
         if (characterRecord_attack.getAttack() > characterRecord_attacked.getDefense()) {
-            Integer newHp = characterRecord_attacked.getHp() - characterRecord_attack.getAttack() + characterRecord_attacked.getDefense();
-            characterRecord_attacked.setHp(newHp);
+            int newHp = characterRecord_attacked.getHp() - characterRecord_attack.getAttack() + characterRecord_attacked.getDefense();
+            characterRecord_attacked.setHp(Math.max(0,newHp));
             characterRecordRepository.save(characterRecord_attacked);
+            if (newHp<=0){
+                //TODO:update structure at position character .x.y
+
+            }
         }
-        characterRecord_attack = characterRecordRepository.save(characterRecord_attack);
         return DTOUtil.toCharacterDTO(characterRecord_attack);
     }
 
@@ -106,10 +116,19 @@ public class CharacterServiceImpl implements CharacterService {
             structure.setHp(newHp);
         else {
             structure.setHp(1);
+            if (structure.getStructureClass() == StructureClass.INSTITUTE && structure.getRemainingRound() > 0) {
+                Player player = structure.getPlayer();
+                String techTreeRemainRound = player.getTechtreeRemainRound();
+                String[] remain = techTreeRemainRound.split(", ");
+                int[] r = Arrays.stream(remain).mapToInt(Integer::parseInt).toArray();
+                r[structure.getValue()] = Player.map.get(Player.name[structure.getValue()])[0];
+                techTreeRemainRound = Arrays.toString(r);
+                player.setTechtreeRemainRound(techTreeRemainRound.substring(1, techTreeRemainRound.length() - 1));
+                playerRepository.save(player);
+            }
             structure.setPlayer(character.getPlayer());
             structure.setValue(0);
             structure.setRemainingRound(0);
-            //TODO:set palyer?
         }
         structureRecordRepository.save(structure);
         return DTOUtil.toCharacterDTO(character);

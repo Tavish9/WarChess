@@ -16,7 +16,7 @@ public interface StructureService {
 
     StructureDTO earnStars(Integer structureId,Integer characterId) throws JsonProcessingException;
 
-    StructureDTO updateTechnologies(Integer structureId,Integer characterId,Integer v,Integer round) throws JsonProcessingException;
+    StructureDTO updateTechnologies(Integer structureId,Integer characterId,Integer v) throws JsonProcessingException;
 
     StructureDTO updateStructure(Integer structureId,Integer v) throws JsonProcessingException;
 }

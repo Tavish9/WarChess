@@ -36,7 +36,7 @@ public class Player {
     private Account account;
 
     @Builder.Default
-    private Long stars = 0L;
+    private Long stars = 10L;
 
     @JsonIgnore
     @ManyToOne
@@ -62,10 +62,10 @@ public class Player {
     @Transient
     @Builder.Default
     public static final Map<String, int[]> map = new HashMap<>();
+    public static final String[] name = {"Life", "Horse", "Fish", "Sword", "Elephant", "Fox", "Bear", "Potion", "Arrow", "Shield", "Cannon"};
 
     static {
-        String[] name = {"Life", "Horse", "Fish", "Sword", "Elephant", "Fox", "Bear", "Potion", "Arrow", "Shield", "Cannon"};
-        int[] round = {0, 2, 2, 2, 3, 3, 3, 3, 3, 3, 5};
+        int[] round = {1, 2, 2, 2, 3, 3, 3, 3, 3, 3, 5};
         int[] stars = {0, 4, 4, 4, 10, 10, 10, 10, 10, 10, 20};
         for (int i = 0; i < name.length; i++) {
             map.put(name[i], new int[]{round[i], stars[i]});

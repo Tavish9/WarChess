@@ -2,6 +2,8 @@ package cn.edu.sustech.cs309.service.impl;
 
 import cn.edu.sustech.cs309.domain.*;
 import cn.edu.sustech.cs309.dto.ArchiveDTO;
+import cn.edu.sustech.cs309.dto.CharacterDTO;
+import cn.edu.sustech.cs309.dto.EquipmentDTO;
 import cn.edu.sustech.cs309.dto.GameDTO;
 import cn.edu.sustech.cs309.repository.*;
 import cn.edu.sustech.cs309.service.GameService;
@@ -9,6 +11,7 @@ import cn.edu.sustech.cs309.utils.DTOUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.configurationprocessor.metadata.ItemMetadata;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -38,6 +41,24 @@ public class GameServiceImpl implements GameService {
 
     @Autowired
     private CharacterRecordRepository characterRecordRepository;
+
+    @Autowired
+    private EquipmentRecordRepository equipmentRecordRepository;
+
+    @Autowired
+    private EquipmentRepository equipmentRepository;
+
+    @Autowired
+    private  ItemRecordRepository itemRecordRepository;
+
+    @Autowired
+    private ItemRepository itemRepository;
+
+    @Autowired
+    private MountRepository mountRepository;
+
+    @Autowired
+    private  MountRecordRepository mountRecordRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -88,12 +109,20 @@ public class GameServiceImpl implements GameService {
         gameRepository.save(game);
         Player player1 = Player.builder().account(account1).game(game).build();
         Player player2 = Player.builder().account(Objects.requireNonNullElse(account2, account1)).game(game).build();
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String name: Player.name) {
+            stringBuilder.append(Player.map.get(name)[0]).append(", ");
+        }
+        player1.setTechtreeRemainRound(stringBuilder.substring(0, stringBuilder.length()-2));
+        player2.setTechtreeRemainRound(stringBuilder.substring(0, stringBuilder.length()-2));
 
         playerRepository.save(player1);
         playerRepository.save(player2);
         game.setPlayer1(player1);
         game.setPlayer2(player2);
         gameRepository.save(game);
+
+        //TODO:init 2shop structure
         return DTOUtil.toGameDTO(player1, player2, 1, game.getPlayerFirst());
     }
 
@@ -117,15 +146,31 @@ public class GameServiceImpl implements GameService {
                 characterRecordRepository.save(c);
             }
         }
+        String techTreeRemainRound = player1.getTechtreeRemainRound();
+        String techTreeFeasible = player1.getTechtreeFeasible();
+        String[] remainCnt = techTreeRemainRound.split(", ");
+        String[] feasibleCnt = techTreeFeasible.split(", ");
+        StringBuilder newTechTreeRemainRound = new StringBuilder();
+        int[] r =new int[remainCnt.length];
+        for (int i = 0; i < remainCnt.length; i++) {
+            r[i] = Integer.parseInt(remainCnt[i]);
+        }
+
         for (StructureRecord s : player1Structures) {
             if (s.getRemainingRound() > 0) {
+                if (s.getStructureClass()==StructureClass.INSTITUTE){
+                    if (r[s.getValue()]>0){
+                        r[s.getValue()]--;
+                    }
+                }
                 if (s.getRemainingRound() == 1) {
                     if (s.getStructureClass() == StructureClass.CAMP) {
                         if (s.getValue() == 0) {
                             //update hp
                             for (CharacterRecord c : characterRecords) {
                                 if (c.getHp() > 0 && c.getX().equals(s.getX()) && c.getY().equals(s.getY())) {
-                                    c.setHp(c.getHp() + s.getLevel() * 2);
+                                    c.setHp(Math.min(50,c.getHp() + s.getLevel() * 2));
+                                    c.setLevel(c.getLevel()+1);
                                     characterRecordRepository.save(c);
                                 }
                             }
@@ -133,7 +178,8 @@ public class GameServiceImpl implements GameService {
                             //update attack
                             for (CharacterRecord c : characterRecords) {
                                 if (c.getHp() > 0 && c.getX().equals(s.getX()) && c.getY().equals(s.getY())) {
-                                    c.setAttack(c.getAttack() + s.getLevel() * 2);
+                                    c.setAttack(Math.min(50, c.getAttack() + s.getLevel() * 2));
+                                    c.setLevel(c.getLevel() + 1);
                                     characterRecordRepository.save(c);
                                 }
                             }
@@ -154,20 +200,10 @@ public class GameServiceImpl implements GameService {
                 s.setRemainingRound(s.getRemainingRound() - 1);
             }
         }
-
+        // TODO:shop
         /*update tech tree*/
-        String techTreeRemainRound = player1.getTechtreeRemainRound();
-        String techTreeFeasible = player1.getTechtreeFeasible();
-        String[] remainCnt = techTreeRemainRound.split(", ");
-        String[] feasibleCnt = techTreeFeasible.split(", ");
-        StringBuilder newTechTreeRemainRound = new StringBuilder();
         for (int i = 0; i < remainCnt.length; i++) {
-            int r = Integer.parseInt(remainCnt[i]);
-            if (feasibleCnt[i].equals("1")) {
-                if (r != 0)
-                    r--;
-                newTechTreeRemainRound.append(r).append(", ");
-            }
+            newTechTreeRemainRound.append(r[i]).append(", ");
         }
         player1.setTechtreeRemainRound(newTechTreeRemainRound.substring(0, newTechTreeRemainRound.length() - 2));
         playerRepository.save(player1);
@@ -212,6 +248,92 @@ public class GameServiceImpl implements GameService {
     private int peaceDegree(Player player) {
         int allCharacter = Objects.requireNonNullElse(characterRecordRepository.countByPlayer(player), 0);
         int deadCharacter = Objects.requireNonNullElse(characterRecordRepository.countByPlayerAndHpEquals(player, 0), 0);
-        return allCharacter - deadCharacter;
+        return 2*allCharacter - 3*deadCharacter;
+    }
+
+    // 4个 function
+
+    private CharacterDTO randomCharacterDTO(){
+        Random r=new Random();
+        int tmp1=r.nextInt(-2,2);
+        int tmp2=r.nextInt(-1,1);
+        int hp=10+2*tmp1;
+        int attack=5+tmp2;
+        int defense=3-tmp1-tmp2;
+        int actionRange=1;
+        CharacterRecord characterRecord=CharacterRecord.builder().actionRange(actionRange)
+                .hp(hp).attack(attack).defense(defense).build();
+        characterRecordRepository.save(characterRecord);
+        return DTOUtil.toCharacterDTO(characterRecord);
+    }
+
+    private EquipmentRecord randomEquipmentRecord(Player player){
+        Random r=new Random();
+        int tmp=1;
+        String techTreeRemainRound = player.getTechtreeRemainRound();
+        String[] remainCnt = techTreeRemainRound.split(", ");
+        if (Integer.parseInt(remainCnt[3])==0){
+            tmp++;
+        }
+        if (Integer.parseInt(remainCnt[8])==0){
+            tmp++;
+        }
+        if (Integer.parseInt(remainCnt[9])==0){
+            tmp++;
+        }
+        if (Integer.parseInt(remainCnt[10])==0){
+            tmp++;
+        }
+        //1:basic  2:sword  3:shield  4:shield 5:cannon
+        int id=r.nextInt(1,tmp+1);
+        Equipment equipment=equipmentRepository.findEquipmentById(id);
+        EquipmentRecord equipmentRecord=EquipmentRecord.builder().equipment(equipment).used(false).build();
+        equipmentRecord=equipmentRecordRepository.save(equipmentRecord);
+        return equipmentRecord;
+    }
+
+    private MountRecord randomMountRecord(Player player){
+        Random r=new Random();
+        int tmp=1;
+        String techTreeRemainRound = player.getTechtreeRemainRound();
+        String[] remainCnt = techTreeRemainRound.split(", ");
+        if (Integer.parseInt(remainCnt[1])==0){
+            tmp++;
+        }
+        if (Integer.parseInt(remainCnt[4])==0){
+            tmp++;
+        }
+        if (Integer.parseInt(remainCnt[5])==0){
+            tmp++;
+        }
+        //1:basic  2:horse  3:elephant  4:fox
+        int id=r.nextInt(1,tmp+1);
+        Mount mount=mountRepository.findMountById(id);
+        MountRecord mountRecord=MountRecord.builder().mount(mount).used(false).build();
+        mountRecord=mountRecordRepository.save(mountRecord);
+        return mountRecord;
+    }
+
+
+    private ItemRecord randomItemRecord(Player player){
+        Random r=new Random();
+        int tmp=1;
+        String techTreeRemainRound = player.getTechtreeRemainRound();
+        String[] remainCnt = techTreeRemainRound.split(", ");
+        if (Integer.parseInt(remainCnt[2])==0){
+            tmp++;
+        }
+        if (Integer.parseInt(remainCnt[6])==0){
+            tmp++;
+        }
+        if (Integer.parseInt(remainCnt[7])==0){
+            tmp++;
+        }
+        //1:basic  2:fish  3:beer  4:potion
+        int id=r.nextInt(1,tmp+1);
+        Item item=itemRepository.findItemById(id);
+        ItemRecord itemRecord=ItemRecord.builder().item(item).used(false).build();
+        itemRecord=itemRecordRepository.save(itemRecord);
+        return itemRecord;
     }
 }

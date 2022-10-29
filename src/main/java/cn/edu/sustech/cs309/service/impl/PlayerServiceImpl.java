@@ -32,6 +32,9 @@ public class PlayerServiceImpl implements PlayerService {
     @Autowired
     private MountRecordRepository mountRecordRepository;
 
+    @Autowired
+    private ShopRecordRepository shopRecordRepository;
+
     @Override
     public PlayerDTO getAll(Integer playerId) throws JsonProcessingException {
         Player player = playerRepository.findPlayerById(playerId);
@@ -49,7 +52,7 @@ public class PlayerServiceImpl implements PlayerService {
         CharacterRecord characterRecord = characterRecordRepository.findCharacterRecordById(characterId);
         if (characterRecord == null)
             throw new RuntimeException("Character does not exist");
-        if (characterRecord.getHp() == 0)
+        if (characterRecord.getHp() <= 0)
             throw new RuntimeException("Character is dead");
         ItemRecord itemRecord = itemRecordRepository.findItemRecordById(itemId);
         if (itemRecord == null)
@@ -57,9 +60,9 @@ public class PlayerServiceImpl implements PlayerService {
         if (itemRecord.getUsed())
             throw new RuntimeException("Item has been used");
         Item item = itemRecord.getItem();
-        characterRecord.setAttack(characterRecord.getAttack() + item.getAttack());
-        characterRecord.setDefense(characterRecord.getDefense() + item.getDefense());
-        characterRecord.setHp(characterRecord.getHp() + item.getHp());
+        characterRecord.setAttack(Math.min(characterRecord.getAttack() + item.getAttack(),50));
+        characterRecord.setDefense(Math.min(characterRecord.getDefense() + item.getDefense(),50));
+        characterRecord.setHp(Math.min(characterRecord.getHp() + item.getHp(),50));
         characterRecordRepository.save(characterRecord);
         itemRecord.setUsed(true);
         itemRecordRepository.save(itemRecord);
@@ -75,7 +78,7 @@ public class PlayerServiceImpl implements PlayerService {
         CharacterRecord characterRecord = characterRecordRepository.findCharacterRecordById(characterId);
         if (characterRecord == null)
             throw new RuntimeException("Character does not exist");
-        if (characterRecord.getHp() == 0)
+        if (characterRecord.getHp() <= 0)
             throw new RuntimeException("Character is dead");
         EquipmentRecord equipmentRecord = characterRecord.getEquipmentRecord();
         if (equipmentRecord == null)
@@ -96,7 +99,7 @@ public class PlayerServiceImpl implements PlayerService {
         CharacterRecord characterRecord = characterRecordRepository.findCharacterRecordById(characterId);
         if (characterRecord == null)
             throw new RuntimeException("Character does not exist");
-        if (characterRecord.getHp() == 0)
+        if (characterRecord.getHp() <= 0)
             throw new RuntimeException("Character is dead");
         EquipmentRecord equipmentRecord = characterRecord.getEquipmentRecord();
         if (equipmentRecord != null)
@@ -118,7 +121,7 @@ public class PlayerServiceImpl implements PlayerService {
         CharacterRecord characterRecord = characterRecordRepository.findCharacterRecordById(characterId);
         if (characterRecord == null)
             throw new RuntimeException("Character does not exist");
-        if (characterRecord.getHp() == 0)
+        if (characterRecord.getHp() <= 0)
             throw new RuntimeException("Character is dead");
         MountRecord mountRecord = characterRecord.getMountRecord();
         if (mountRecord == null)
@@ -139,7 +142,7 @@ public class PlayerServiceImpl implements PlayerService {
         CharacterRecord characterRecord = characterRecordRepository.findCharacterRecordById(characterId);
         if (characterRecord == null)
             throw new RuntimeException("Character does not exist");
-        if (characterRecord.getHp() == 0)
+        if (characterRecord.getHp() <= 0)
             throw new RuntimeException("Character is dead");
         MountRecord mountRecord = characterRecord.getMountRecord();
         if (mountRecord != null)
@@ -199,44 +202,65 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public EquipmentDTO buyEquipment(Integer playerId, Integer equipmentId) {
+    public EquipmentDTO buyEquipment(Integer playerId, Integer shopId) {
         Player player = playerRepository.findPlayerById(playerId);
         if (player == null)
             throw new RuntimeException("Player does not exist");
-        EquipmentRecord equipmentRecord = equipmentRecordRepository.findEquipmentRecordById(equipmentId);
+        ShopRecord shopRecord = shopRecordRepository.findShopRecordById(shopId);
+        if (shopRecord == null)
+            throw new RuntimeException("ShopId is not valid");
+        EquipmentRecord equipmentRecord = equipmentRecordRepository.findEquipmentRecordById(shopRecord.getPropid());
         if (equipmentRecord == null)
             throw new RuntimeException("Equipment does not exist");
+        if (player.getStars() < shopRecord.getCost())
+            throw new RuntimeException("Player does not have enough stars");
         equipmentRecord.setPlayer(player);
         equipmentRecordRepository.save(equipmentRecord);
-        log.debug("player " + playerId + " buy equipment" + equipmentId);
+        player.setStars(player.getStars() - shopRecord.getCost());
+        playerRepository.save(player);
+        log.debug("player " + playerId + " buy equipment" + equipmentRecord.getId());
         return DTOUtil.toEquipmentDTO(equipmentRecord);
     }
 
     @Override
-    public MountDTO buyMount(Integer playerId, Integer mountId) {
+    public MountDTO buyMount(Integer playerId, Integer shopId) {
         Player player = playerRepository.findPlayerById(playerId);
         if (player == null)
             throw new RuntimeException("Player does not exist");
-        MountRecord mountRecord = mountRecordRepository.findMountRecordById(mountId);
+        ShopRecord shopRecord = shopRecordRepository.findShopRecordById(shopId);
+        if (shopRecord == null)
+            throw new RuntimeException("ShopId is not valid");
+        MountRecord mountRecord = mountRecordRepository.findMountRecordById(shopRecord.getPropid());
         if (mountRecord == null)
             throw new RuntimeException("Mount does not exist");
+        if (player.getStars() < shopRecord.getCost())
+            throw new RuntimeException("Player does not have enough stars");
         mountRecord.setPlayer(player);
         mountRecordRepository.save(mountRecord);
-        log.debug("player " + playerId + " buy mount" + mountRecord);
+        player.setStars(player.getStars() - shopRecord.getCost());
+        playerRepository.save(player);
+        log.debug("player " + playerId + " buy mount" + mountRecord.getId());
         return DTOUtil.toMountDTO(mountRecord);
     }
 
     @Override
-    public ItemDTO buyItem(Integer playerId, Integer itemId) {
+    public ItemDTO buyItem(Integer playerId, Integer shopId) {
         Player player = playerRepository.findPlayerById(playerId);
         if (player == null)
             throw new RuntimeException("Player does not exist");
-        ItemRecord itemRecord = itemRecordRepository.findItemRecordById(itemId);
+        ShopRecord shopRecord = shopRecordRepository.findShopRecordById(shopId);
+        if (shopRecord == null)
+            throw new RuntimeException("ShopId is not valid");
+        ItemRecord itemRecord = itemRecordRepository.findItemRecordById(shopRecord.getPropid());
         if (itemRecord == null)
             throw new RuntimeException("Item does not exist");
+        if (player.getStars() < shopRecord.getCost())
+            throw new RuntimeException("Player does not have enough stars");
         itemRecord.setPlayer(player);
         itemRecordRepository.save(itemRecord);
-        log.debug("player " + playerId + " buy item" + itemRecord);
+        player.setStars(player.getStars() - shopRecord.getCost());
+        playerRepository.save(player);
+        log.debug("player " + playerId + " buy item" + itemRecord.getId());
         return DTOUtil.toItemDTO(itemRecord);
     }
 }

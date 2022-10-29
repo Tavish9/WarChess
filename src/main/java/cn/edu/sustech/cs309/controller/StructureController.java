@@ -60,9 +60,8 @@ public class StructureController {
     @PutMapping("/structure/{structureid}/insititude")
     public ResponseResult<?> updateTechnologies(@PathVariable("structureid") Integer structureId,
                                                 @RequestParam("characterid") Integer characterId,
-                                                @RequestParam("option") Integer v,
-                                                @RequestParam("round")Integer round) throws JsonProcessingException {
-        return ResponseResult.success(structureService.updateTechnologies(structureId, characterId, v,round));
+                                                @RequestParam("option") Integer v) throws JsonProcessingException {
+        return ResponseResult.success(structureService.updateTechnologies(structureId, characterId, v));
     }
 
     @ApiOperation(value = "升级建筑")
