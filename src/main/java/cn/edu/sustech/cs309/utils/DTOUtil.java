@@ -2,6 +2,9 @@ package cn.edu.sustech.cs309.utils;
 
 import cn.edu.sustech.cs309.domain.*;
 import cn.edu.sustech.cs309.dto.*;
+import cn.edu.sustech.cs309.repository.EquipmentRecordRepository;
+import cn.edu.sustech.cs309.repository.ItemRecordRepository;
+import cn.edu.sustech.cs309.repository.MountRecordRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,12 +19,24 @@ public class DTOUtil {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private EquipmentRecordRepository equipmentRecordRepository;
+
+    @Autowired
+    private ItemRecordRepository itemRecordRepository;
+
+    @Autowired
+    private MountRecordRepository mountRecordRepository;
+
     private static DTOUtil dtoUtil;
 
     @PostConstruct
     public void init() {
         dtoUtil = this;
         dtoUtil.objectMapper = this.objectMapper;
+        dtoUtil.equipmentRecordRepository = this.equipmentRecordRepository;
+        dtoUtil.itemRecordRepository = this.itemRecordRepository;
+        dtoUtil.mountRecordRepository = this.mountRecordRepository;
     }
 
 
@@ -107,13 +122,40 @@ public class DTOUtil {
         return structureDTOS;
     }
 
+    public static ShopDTO toShopDTO(List<ShopRecord> shopRecords) {
+        if (shopRecords == null)
+            return null;
+        List<EquipmentDTO> equipmentDTOS = new ArrayList<>();
+        List<ItemDTO> itemDTOS = new ArrayList<>();
+        List<MountDTO> mountDTOS = new ArrayList<>();
+        for (ShopRecord shoprecord : shopRecords) {
+            if (shoprecord.getShopClass() == ShopClass.EQUIPMENT)
+                equipmentDTOS.add(DTOUtil.toEquipmentDTO(dtoUtil.equipmentRecordRepository.findEquipmentRecordById(shoprecord.getPropid())));
+            else if (shoprecord.getShopClass() == ShopClass.ITEM)
+                itemDTOS.add(DTOUtil.toItemDTO(dtoUtil.itemRecordRepository.findItemRecordById(shoprecord.getPropid())));
+            else
+                mountDTOS.add(DTOUtil.toMountDTO(dtoUtil.mountRecordRepository.findMountRecordById(shoprecord.getPropid())));
+        }
+        int[][] index = new int[3][equipmentDTOS.size()];
+        int e = 0, i = 0, m = 0;
+        for (ShopRecord shoprecord : shopRecords) {
+            if (shoprecord.getShopClass() == ShopClass.EQUIPMENT)
+                index[0][e++] = shoprecord.getId();
+            else if (shoprecord.getShopClass() == ShopClass.ITEM)
+                index[1][i++] = shoprecord.getId();
+            else
+                index[2][m++] = shoprecord.getId();
+        }
+        return new ShopDTO(equipmentDTOS, itemDTOS, mountDTOS, index);
+    }
+
     public static PlayerDTO toPlayerDTO(Player player) throws JsonProcessingException {
         return new PlayerDTO(player.getId(), player.getStars(), player.getProsperityDegree(), player.getPeaceDegree(),
-                player.getTech(), toCharacterDTOs(player.getCharacterRecords()), toEquipmentDTOs(player.getEquipmentRecords()),
+                player.getTech(), null, toShopDTO(player.getShopRecords()), toCharacterDTOs(player.getCharacterRecords()), toEquipmentDTOs(player.getEquipmentRecords()),
                 toMountDTOs(player.getMountRecords()), toItemDTOs(player.getItemRecords()), toStructureDTOs(player.getStructureRecords()));
     }
 
-    public static GameDTO toGameDTO(Player player1, Player player2, Integer round, Boolean currentPlayer) throws JsonProcessingException {
-        return new GameDTO(toPlayerDTO(player1), toPlayerDTO(player2), round, currentPlayer);
+    public static GameDTO toGameDTO(Integer id, Player player1, Player player2, Integer round, Boolean currentPlayer, ShopDTO shopDTO) throws JsonProcessingException {
+        return new GameDTO(id, toPlayerDTO(player1), toPlayerDTO(player2), shopDTO, round, currentPlayer);
     }
 }
