@@ -59,9 +59,8 @@ public class Player {
 
     private String vision;
 
-    @Transient
-    @Builder.Default
     public static final Map<String, int[]> map = new HashMap<>();
+
     public static final String[] name = {"Life", "Horse", "Fish", "Sword", "Elephant", "Fox", "Bear", "Potion", "Arrow", "Shield", "Cannon"};
 
     static {
@@ -102,7 +101,7 @@ public class Player {
     @Builder.Default
     private List<MountRecord> mountRecords = new ArrayList<>();
 
-    @JsonManagedReference
+    @JsonIgnore
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
     @ToString.Exclude
     @Builder.Default
