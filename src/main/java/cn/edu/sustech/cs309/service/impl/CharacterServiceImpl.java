@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -76,6 +77,8 @@ public class CharacterServiceImpl implements CharacterService {
             throw new RuntimeException("attacker is dead");
         if (characterRecord_attacked == null)
             throw new RuntimeException("character attacked does not exist");
+        if (characterRecord_attacked.getPlayer()==null)
+            throw new RuntimeException("character attacked is dismissed");
         if (characterRecord_attacked.getHp() <= 0)
             throw new RuntimeException("character attacked is dead");
         if (characterRecord_attack.getActionState() == 2)
@@ -88,7 +91,25 @@ public class CharacterServiceImpl implements CharacterService {
             characterRecordRepository.save(characterRecord_attacked);
             if (newHp<=0){
                 //TODO:update structure at position character .x.y
-
+                int x=characterRecord_attacked.getX(),y=characterRecord_attacked.getY();
+                List<StructureRecord> structureRecords = structureRecordRepository.findStructureRecordByPlayerAndHpGreaterThan(characterRecord_attacked.getPlayer(), 0);
+                for (StructureRecord s:structureRecords){
+                    if (s.getX().equals(x)&&s.getY().equals(y)){
+                        if (s.getStructureClass()==StructureClass.INSTITUTE && s.getRemainingRound()>0){
+                            Player player = s.getPlayer();
+                            String techTreeRemainRound = player.getTechtreeRemainRound();
+                            String[] remain = techTreeRemainRound.split(", ");
+                            int[] r = Arrays.stream(remain).mapToInt(Integer::parseInt).toArray();
+                            r[s.getValue()] = Player.map.get(Player.name[s.getValue()])[0];
+                            techTreeRemainRound = Arrays.toString(r);
+                            player.setTechtreeRemainRound(techTreeRemainRound.substring(1, techTreeRemainRound.length() - 1));
+                            playerRepository.save(player);
+                        }
+                        s.setRemainingRound(0);
+                        s.setValue(0);
+                        structureRecordRepository.save(s);
+                    }
+                }
             }
         }
         return DTOUtil.toCharacterDTO(characterRecord_attack);
