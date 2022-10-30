@@ -41,14 +41,18 @@ public class StructureRecord {
     @Enumerated(EnumType.STRING)
     private StructureClass structureClass;
 
-    private Integer level;
+    @Builder.Default
+    private Integer level = 0;
 
-    private Integer hp;
+    @Builder.Default
+    private Integer hp = 30;
 
+    @Builder.Default
     @Column(name="remaining_round")
-    private Integer remainingRound;
+    private Integer remainingRound = 0;
 
-    private Integer value;
+    @Builder.Default
+    private Integer value = 0;
 
     private Integer x;
 

@@ -91,37 +91,11 @@ public class StructureServiceImpl implements StructureService {
         structureRecord = structureRecordRepository.save(structureRecord);
         player.setStars(player.getStars() - 3);
         playerRepository.save(player);
-
-        int actionRange = characterDTO_add.actionRange();
-        int attack = characterDTO_add.attack();
-        int defense = characterDTO_add.defense();
-        int hp = characterDTO_add.hp();
-
-        CharacterClass characterClass;
-        if (type == 0) {
-            characterClass = CharacterClass.WARRIOR;
-            attack = (attack * 15 + 14) / 10;
-            defense = (defense * 15 + 14) / 10;
-            hp = (hp * 15 + 14) / 10;
-        } else {
-            if (type == 1) {
-                characterClass = CharacterClass.EXPLORER;
-                actionRange = actionRange + 1;
-            } else
-                characterClass = CharacterClass.SCHOLAR;
-        }
-        characterRecord.setAttack(attack);
-        characterRecord.setDefense(defense);
-        characterRecord.setHp(hp);
+        characterRecord.updateAttribute(type);
         characterRecord.setX(x);
         characterRecord.setY(y);
-        characterRecord.setCharacterClass(characterClass);
-        characterRecord.setLevel(characterDTO_add.level());
-        characterRecord.setActionRange(actionRange);
         log.debug(playerId + "buy a character");
-
         characterRecordRepository.save(characterRecord);
-
         return DTOUtil.toStructureDTO(structureRecord);
     }
 
