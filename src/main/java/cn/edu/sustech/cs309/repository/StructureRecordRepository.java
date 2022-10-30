@@ -17,5 +17,8 @@ public interface StructureRecordRepository extends JpaRepository<StructureRecord
     @Query(value = "select sum(level) from structure_record where player_id = ?1", nativeQuery = true)
     Integer getSumLevel(Integer playerId);
 
-    Integer countByPlayerAndHpGreaterThan(Player player, Integer hp);
+    Integer countByPlayer(Player player);
+
+    @Query(value = "select count(*) from structure_record where player_id = ?1 and structure_class = ?2", nativeQuery = true)
+    Integer countByPlayerAndStructureClass(Integer playerId, String structureClass);
 }
