@@ -2,7 +2,6 @@ package cn.edu.sustech.cs309.controller;
 
 import cn.edu.sustech.cs309.domain.ResponseResult;
 import cn.edu.sustech.cs309.service.PlayerService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -17,14 +16,6 @@ public class PlayerController {
 
     @Autowired
     private PlayerService playerService;
-
-    @ApiOperation(value = "获取信息")
-    @GetMapping("/player/{playerid}")
-    public ResponseResult<?> getAll(@PathVariable("playerid") Integer playerId) throws JsonProcessingException {
-        if (playerId <= 0)
-            throw new RuntimeException("Invalid player");
-        return ResponseResult.success(playerService.getAll(playerId));
-    }
 
     @ApiOperation(value = "使用道具")
     @PutMapping("/player/{playerid}/item")

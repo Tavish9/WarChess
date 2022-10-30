@@ -36,15 +36,6 @@ public class PlayerServiceImpl implements PlayerService {
     private ShopRecordRepository shopRecordRepository;
 
     @Override
-    public PlayerDTO getAll(Integer playerId) throws JsonProcessingException {
-        Player player = playerRepository.findPlayerById(playerId);
-        if (player == null)
-            throw new RuntimeException("Player does not exist");
-        log.debug("find player");
-        return DTOUtil.toPlayerDTO(player);
-    }
-
-    @Override
     public CharacterDTO updateItem(Integer playerId, Integer characterId, Integer itemId) {
         Player player = playerRepository.findPlayerById(playerId);
         if (player == null)

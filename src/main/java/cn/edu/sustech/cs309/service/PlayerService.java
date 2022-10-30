@@ -1,13 +1,10 @@
 package cn.edu.sustech.cs309.service;
 
 import cn.edu.sustech.cs309.dto.*;
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.util.List;
 
 public interface PlayerService {
-    PlayerDTO getAll(Integer playerId) throws JsonProcessingException;
-
     CharacterDTO updateItem(Integer playerId, Integer characterId, Integer itemId);
 
     CharacterDTO offEquipment(Integer playerId, Integer characterId, Integer equipmentId);
