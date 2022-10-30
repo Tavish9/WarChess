@@ -2,5 +2,5 @@ package cn.edu.sustech.cs309.dto;
 
 import java.io.Serializable;
 
-public record GameDTO(PlayerDTO player1, PlayerDTO player2, Integer round, Boolean currentPlayer) implements Serializable {
+public record GameDTO(Integer id, PlayerDTO player1, PlayerDTO player2, ShopDTO shopDTO, Integer round, Boolean currentPlayer) implements Serializable {
 }
