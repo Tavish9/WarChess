@@ -52,7 +52,7 @@ public class StructureServiceImpl implements StructureService {
     }
 
     @Override
-    public StructureDTO buyCharacter(Integer structureId, Integer playerId, Integer id, Integer x, Integer y,Integer type) throws JsonProcessingException {
+    public StructureDTO buyCharacter(Integer structureId, Integer playerId, Integer id, Integer x, Integer y, Integer type) throws JsonProcessingException {
         Player player = playerRepository.findPlayerById(playerId);
         if (player == null)
             throw new RuntimeException("player does not exist");
@@ -68,48 +68,46 @@ public class StructureServiceImpl implements StructureService {
         List<CharacterDTO> characterDTOS = structureDTO.characters();
         if (id < 0)
             throw new RuntimeException("character does not exist");
-        if (type<0 || type>=3)
+        if (type < 0 || type >= 3)
             throw new RuntimeException("type is wrong");
 
-        CharacterDTO characterDTO_add=null;
-        for (CharacterDTO c:characterDTOS) {
-            if (c.id().equals(id)){
-                characterDTO_add=c;
+        CharacterDTO characterDTO_add = null;
+        for (CharacterDTO c : characterDTOS) {
+            if (c.id().equals(id)) {
+                characterDTO_add = c;
                 break;
             }
         }
-        if (characterDTO_add==null){
+        if (characterDTO_add == null) {
             throw new RuntimeException("character_add does not exist");
         }
 
-        CharacterRecord characterRecord =characterRecordRepository.findCharacterRecordById(id);
-        if (characterRecord==null)
+        CharacterRecord characterRecord = characterRecordRepository.findCharacterRecordById(id);
+        if (characterRecord == null)
             throw new RuntimeException("character does not exist");
 
         characterDTOS.remove(characterDTO_add);
         structureRecord.setCharacter(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(characterDTOS));
-        structureRecord=structureRecordRepository.save(structureRecord);
-        player.setStars(player.getStars()-3);
-        player=playerRepository.save(player);
+        structureRecord = structureRecordRepository.save(structureRecord);
+        player.setStars(player.getStars() - 3);
+        playerRepository.save(player);
 
-        int actionRange= characterDTO_add.actionRange();
-        int attack=characterDTO_add.attack();
-        int defense=characterDTO_add.defense();
-        int hp=characterDTO_add.hp();
+        int actionRange = characterDTO_add.actionRange();
+        int attack = characterDTO_add.attack();
+        int defense = characterDTO_add.defense();
+        int hp = characterDTO_add.hp();
 
         CharacterClass characterClass;
-        if (type==0) {
+        if (type == 0) {
             characterClass = CharacterClass.WARRIOR;
-            attack=(attack*15+14)/10;
-            defense=(defense*15+14)/10;
-            hp=(hp*15+14)/10;
-        }
-        else {
+            attack = (attack * 15 + 14) / 10;
+            defense = (defense * 15 + 14) / 10;
+            hp = (hp * 15 + 14) / 10;
+        } else {
             if (type == 1) {
                 characterClass = CharacterClass.EXPLORER;
-                actionRange = actionRange+1;
-            }
-            else
+                actionRange = actionRange + 1;
+            } else
                 characterClass = CharacterClass.SCHOLAR;
         }
         characterRecord.setAttack(attack);
@@ -120,7 +118,7 @@ public class StructureServiceImpl implements StructureService {
         characterRecord.setCharacterClass(characterClass);
         characterRecord.setLevel(characterDTO_add.level());
         characterRecord.setActionRange(actionRange);
-        log.debug(playerId+"buy a character");
+        log.debug(playerId + "buy a character");
 
         characterRecordRepository.save(characterRecord);
 
@@ -132,16 +130,16 @@ public class StructureServiceImpl implements StructureService {
         StructureRecord structureRecord = structureRecordRepository.findStructureRecordById(structureId);
         if (structureRecord == null)
             throw new RuntimeException("structure does not exist");
-        if (structureRecord.getStructureClass()!=StructureClass.CAMP||structureRecord.getLevel()==0)
+        if (structureRecord.getStructureClass() != StructureClass.CAMP || structureRecord.getLevel() == 0)
             throw new RuntimeException("struct should be camp to train");
-        if (structureRecord.getRemainingRound()>0)
+        if (structureRecord.getRemainingRound() > 0)
             throw new RuntimeException("structure is being used");
-        CharacterRecord characterRecord=characterRecordRepository.findCharacterRecordById(characterId);
+        CharacterRecord characterRecord = characterRecordRepository.findCharacterRecordById(characterId);
         if (characterRecord == null)
             throw new RuntimeException("character does not exist");
-        if (characterRecord .getActionState()==2)
+        if (characterRecord.getActionState() == 2)
             throw new RuntimeException("character already act");
-        if (v<0 || v>=2)
+        if (v < 0 || v >= 2)
             throw new RuntimeException("v is wrong");
 
         characterRecord.setActionState(2);
@@ -149,7 +147,7 @@ public class StructureServiceImpl implements StructureService {
 
         structureRecord.setValue(v);
         structureRecord.setRemainingRound(2);
-        structureRecord=structureRecordRepository.save(structureRecord);
+        structureRecord = structureRecordRepository.save(structureRecord);
         return DTOUtil.toStructureDTO(structureRecord);
     }
 
@@ -158,21 +156,21 @@ public class StructureServiceImpl implements StructureService {
         StructureRecord structureRecord = structureRecordRepository.findStructureRecordById(structureId);
         if (structureRecord == null)
             throw new RuntimeException("structure does not exist");
-        if (structureRecord.getStructureClass()!=StructureClass.MARKET||structureRecord.getLevel()==0)
+        if (structureRecord.getStructureClass() != StructureClass.MARKET || structureRecord.getLevel() == 0)
             throw new RuntimeException("struct should be market to earnStars");
         if (structureRecord.getRemainingRound() > 0)
             throw new RuntimeException("structure is being used");
-        CharacterRecord characterRecord=characterRecordRepository.findCharacterRecordById(characterId);
+        CharacterRecord characterRecord = characterRecordRepository.findCharacterRecordById(characterId);
         if (characterRecord == null)
             throw new RuntimeException("character does not exist");
-        if (characterRecord .getActionState()==2)
+        if (characterRecord.getActionState() == 2)
             throw new RuntimeException("character already act");
 
         characterRecord.setActionState(2);
         characterRecordRepository.save(characterRecord);
 
         structureRecord.setRemainingRound(1);
-        structureRecord=structureRecordRepository.save(structureRecord);
+        structureRecord = structureRecordRepository.save(structureRecord);
         return DTOUtil.toStructureDTO(structureRecord);
     }
 
@@ -181,29 +179,29 @@ public class StructureServiceImpl implements StructureService {
         StructureRecord structureRecord = structureRecordRepository.findStructureRecordById(structureId);
         if (structureRecord == null)
             throw new RuntimeException("structure does not exist");
-        if (structureRecord.getStructureClass()!=StructureClass.INSTITUTE ||structureRecord.getLevel()==0)
+        if (structureRecord.getStructureClass() != StructureClass.INSTITUTE || structureRecord.getLevel() == 0)
             throw new RuntimeException("structure should be institute to updateTechnologies");
         if (structureRecord.getRemainingRound() > 0)
             throw new RuntimeException("structure is being used");
-        CharacterRecord characterRecord=characterRecordRepository.findCharacterRecordById(characterId);
+        CharacterRecord characterRecord = characterRecordRepository.findCharacterRecordById(characterId);
         if (characterRecord == null)
             throw new RuntimeException("character does not exist");
-        if (characterRecord.getActionState()==2)
+        if (characterRecord.getActionState() == 2)
             throw new RuntimeException("character already act");
-        if (characterRecord.getCharacterClass()!=CharacterClass.SCHOLAR)
+        if (characterRecord.getCharacterClass() != CharacterClass.SCHOLAR)
             throw new RuntimeException("character should be scholar to updateTechnologies");
         if (v < 0 || v > 10)
             throw new RuntimeException("Index is not valid");
 
-        Player player=structureRecord.getPlayer();
+        Player player = structureRecord.getPlayer();
 
         String techTreeFeasible = player.getTechtreeFeasible();
         String[] feasible = techTreeFeasible.split(", ");
         if (feasible[v].equals("0"))
             throw new RuntimeException("Tree node is not feasible");
-        if (Player.map.get(Player.name[v])[1]> player.getStars())
+        if (Player.map.get(Player.name[v])[1] > player.getStars())
             throw new RuntimeException("player does not have enough money");
-        player.setStars(player.getStars()-Player.map.get(Player.name[v])[1]);
+        player.setStars(player.getStars() - Player.map.get(Player.name[v])[1]);
         playerRepository.save(player);
 
         characterRecord.setActionState(2);
@@ -211,7 +209,7 @@ public class StructureServiceImpl implements StructureService {
 
         structureRecord.setValue(v);
         structureRecord.setRemainingRound(Player.map.get(Player.name[v])[0]);
-        structureRecord=structureRecordRepository.save(structureRecord);
+        structureRecord = structureRecordRepository.save(structureRecord);
         return DTOUtil.toStructureDTO(structureRecord);
     }
 
@@ -221,35 +219,35 @@ public class StructureServiceImpl implements StructureService {
         if (structureRecord == null)
             throw new RuntimeException("structure does not exist");
 
-        if (structureRecord.getStructureClass()==StructureClass.RELIC)
-            throw  new RuntimeException("Relic can not be update");
-        if (structureRecord.getStructureClass()==StructureClass.INSTITUTE && structureRecord.getLevel()==1)
-            throw  new RuntimeException("institute can not be update");
-        if (structureRecord.getRemainingRound()>0)
+        if (structureRecord.getStructureClass() == StructureClass.RELIC)
+            throw new RuntimeException("Relic can not be update");
+        if (structureRecord.getStructureClass() == StructureClass.INSTITUTE && structureRecord.getLevel() == 1)
+            throw new RuntimeException("institute can not be update");
+        if (structureRecord.getRemainingRound() > 0)
             throw new RuntimeException("structure can not be update when be using");
 
-        Player player= structureRecord.getPlayer();
-        if (player==null)
+        Player player = structureRecord.getPlayer();
+        if (player == null)
             throw new RuntimeException("structure does not exist");
-        int costMoney=structureRecord.getLevel()*10;
-        if (player.getStars()<costMoney)
+        int costMoney = structureRecord.getLevel() * 10;
+        if (player.getStars() < costMoney)
             throw new RuntimeException("player does not have enough money");
 
-        if (costMoney==0){
-            if (v<0 || v>=3 )
+        if (costMoney == 0) {
+            if (v < 0 || v >= 3)
                 throw new RuntimeException("v is wrong");
             StructureClass structureClass;
-            if (v==0)structureClass=StructureClass.CAMP;
+            if (v == 0) structureClass = StructureClass.CAMP;
             else {
-                if (v==1)structureClass=StructureClass.MARKET;
-                else structureClass=StructureClass.INSTITUTE;
+                if (v == 1) structureClass = StructureClass.MARKET;
+                else structureClass = StructureClass.INSTITUTE;
             }
             structureRecord.setStructureClass(structureClass);
         }
 
-        player.setStars(player.getStars()-costMoney);
+        player.setStars(player.getStars() - costMoney);
         playerRepository.save(player);
-        structureRecord.setLevel(structureRecord.getLevel()+1);
+        structureRecord.setLevel(structureRecord.getLevel() + 1);
         structureRecordRepository.save(structureRecord);
         return DTOUtil.toStructureDTO(structureRecord);
     }
