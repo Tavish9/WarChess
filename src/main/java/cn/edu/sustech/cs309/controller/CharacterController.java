@@ -24,7 +24,7 @@ public class CharacterController {
     }
 
     @ApiOperation(value = "解雇角色")
-    @PutMapping("/characterid/{characterid}/dismiss")
+    @PutMapping("/character/{characterid}/dismiss")
     public ResponseResult<?> dismissCharacter(@PathVariable("characterid") Integer characterId) {
         return ResponseResult.success(characterService.dismissCharacter(characterId));
     }

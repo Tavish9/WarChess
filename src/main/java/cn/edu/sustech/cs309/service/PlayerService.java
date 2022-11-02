@@ -23,9 +23,9 @@ public interface PlayerService {
 
     List<ItemDTO> getItems(Integer playerId);
 
-    EquipmentDTO buyEquipment(Integer playerId, Integer equipmentId);
+    EquipmentDTO buyEquipment(Integer playerId, Integer shopId);
 
-    MountDTO buyMount(Integer playerId, Integer mountId);
+    MountDTO buyMount(Integer playerId, Integer shopId);
 
-    ItemDTO buyItem(Integer playerId, Integer itemId);
+    ItemDTO buyItem(Integer playerId, Integer shopId);
 }

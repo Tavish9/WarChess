@@ -82,7 +82,7 @@ public class PlayerController {
         return ResponseResult.success(playerService.getMounts(playerId));
     }
 
-    @ApiOperation(value = "购买players商店对应的道具")
+    @ApiOperation(value = "获取players商店对应的道具")
     @GetMapping("/player/{playerid}/item")
     public ResponseResult<?> getItems(@PathVariable("playerid") Integer playerId) {
         if (playerId <= 0)
@@ -92,29 +92,29 @@ public class PlayerController {
 
 
     @ApiOperation(value = "购买players商店对应的装备")
-    @PutMapping(value = "/player/{playerid}/equip", params = "equipmentid")
+    @PostMapping(value = "/player/{playerid}/equip")
     public ResponseResult<?> buyEquipments(@PathVariable("playerid") Integer playerId,
-                                           @RequestParam("equipmentid") Integer equipmentId) {
-        if (playerId <= 0 || equipmentId <= 0)
+                                           @RequestParam("shopId") Integer shopId) {
+        if (playerId <= 0 || shopId <= 0)
             throw new RuntimeException("Invalid input");
-        return ResponseResult.success(playerService.buyEquipment(playerId, equipmentId));
+        return ResponseResult.success(playerService.buyEquipment(playerId, shopId));
     }
 
     @ApiOperation(value = "购买players商店对应的坐骑")
-    @PutMapping(value = "/player/{playerid}/mount", params = "mountid")
+    @PostMapping(value = "/player/{playerid}/mount")
     public ResponseResult<?> buyMounts(@PathVariable("playerid") Integer playerId,
-                                       @RequestParam("mountid") Integer mountId) {
-        if (playerId <= 0 || mountId <= 0)
+                                       @RequestParam("shopId") Integer shopId) {
+        if (playerId <= 0 || shopId <= 0)
             throw new RuntimeException("Invalid input");
-        return ResponseResult.success(playerService.buyMount(playerId, mountId));
+        return ResponseResult.success(playerService.buyMount(playerId, shopId));
     }
 
     @ApiOperation(value = "购买players商店对应的道具")
-    @PutMapping(value = "/player/{playerid}/item", params = "itemid")
+    @PostMapping(value = "/player/{playerid}/item")
     public ResponseResult<?> buyItems(@PathVariable("playerid") Integer playerId,
-                                      @RequestParam("itemid") Integer itemId) {
-        if (playerId <= 0 || itemId <= 0)
+                                      @RequestParam("shopId") Integer shopId) {
+        if (playerId <= 0 || shopId <= 0)
             throw new RuntimeException("Invalid input");
-        return ResponseResult.success(playerService.buyItem(playerId, itemId));
+        return ResponseResult.success(playerService.buyItem(playerId, shopId));
     }
 }
