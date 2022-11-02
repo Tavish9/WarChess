@@ -34,6 +34,11 @@ public class StructureRecord {
 
     @JsonBackReference
     @ManyToOne
+    @JoinColumn(name = "game_id")
+    private Game game;
+
+    @JsonBackReference
+    @ManyToOne
     @JoinColumn(name = "player_id")
     private Player player;
 

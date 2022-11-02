@@ -5,6 +5,7 @@ import cn.edu.sustech.cs309.dto.*;
 import cn.edu.sustech.cs309.repository.EquipmentRecordRepository;
 import cn.edu.sustech.cs309.repository.ItemRecordRepository;
 import cn.edu.sustech.cs309.repository.MountRecordRepository;
+import cn.edu.sustech.cs309.repository.StructureRecordRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ public class DTOUtil {
     @Autowired
     private MountRecordRepository mountRecordRepository;
 
+    @Autowired
+    private StructureRecordRepository structureRecordRepository;
+
     private static DTOUtil dtoUtil;
 
     @PostConstruct
@@ -37,6 +41,7 @@ public class DTOUtil {
         dtoUtil.equipmentRecordRepository = this.equipmentRecordRepository;
         dtoUtil.itemRecordRepository = this.itemRecordRepository;
         dtoUtil.mountRecordRepository = this.mountRecordRepository;
+        dtoUtil.structureRecordRepository = this.structureRecordRepository;
     }
 
 
@@ -49,6 +54,8 @@ public class DTOUtil {
     }
 
     public static List<ArchiveDTO> toArchiveDTOs(List<Archive> archices) throws JsonProcessingException {
+        if (archices == null)
+            return null;
         List<ArchiveDTO> archiveDTOS = new ArrayList<>(archices.size());
         for (Archive a : archices) {
             archiveDTOS.add(DTOUtil.toArchiveDTO(a));
@@ -63,6 +70,8 @@ public class DTOUtil {
     }
 
     public static List<CharacterDTO> toCharacterDTOs(List<CharacterRecord> characterRecords) {
+        if (characterRecords == null)
+            return null;
         List<CharacterDTO> characterDTOS = new ArrayList<>(characterRecords.size());
         characterDTOS.addAll(characterRecords.stream().map(DTOUtil::toCharacterDTO).toList());
         return characterDTOS;
@@ -75,6 +84,8 @@ public class DTOUtil {
     }
 
     public static List<EquipmentDTO> toEquipmentDTOs(List<EquipmentRecord> equipmentRecords) {
+        if (equipmentRecords == null)
+            return null;
         List<EquipmentDTO> equipmentDTOS = new ArrayList<>(equipmentRecords.size());
         equipmentDTOS.addAll(equipmentRecords.stream().map(DTOUtil::toEquipmentDTO).toList());
         return equipmentDTOS;
@@ -86,6 +97,8 @@ public class DTOUtil {
     }
 
     public static List<ItemDTO> toItemDTOs(List<ItemRecord> itemRecords) {
+        if (itemRecords == null)
+            return null;
         List<ItemDTO> itemDTOS = new ArrayList<>(itemRecords.size());
         itemDTOS.addAll(itemRecords.stream().map(DTOUtil::toItemDTO).toList());
         return itemDTOS;
@@ -97,6 +110,8 @@ public class DTOUtil {
     }
 
     public static List<MountDTO> toMountDTOs(List<MountRecord> mountRecords) {
+        if (mountRecords == null)
+            return null;
         List<MountDTO> mountDTOS = new ArrayList<>(mountRecords.size());
         mountDTOS.addAll(mountRecords.stream().map(DTOUtil::toMountDTO).toList());
         return mountDTOS;
@@ -115,6 +130,8 @@ public class DTOUtil {
     }
 
     public static List<StructureDTO> toStructureDTOs(List<StructureRecord> structureRecords) throws JsonProcessingException {
+        if (structureRecords == null)
+            return null;
         List<StructureDTO> structureDTOS = new ArrayList<>(structureRecords.size());
         for (StructureRecord s : structureRecords) {
             structureDTOS.add(DTOUtil.toStructureDTO(s));
@@ -155,7 +172,8 @@ public class DTOUtil {
                 toMountDTOs(player.getMountRecords()), toItemDTOs(player.getItemRecords()), toStructureDTOs(player.getStructureRecords()));
     }
 
-    public static GameDTO toGameDTO(Integer id, Player player1, Player player2, Integer round, Boolean currentPlayer, ShopDTO shopDTO) throws JsonProcessingException {
-        return new GameDTO(id, toPlayerDTO(player1), toPlayerDTO(player2), shopDTO, round, currentPlayer);
+    public static GameDTO toGameDTO(Game game, ShopDTO shopDTO, int round, boolean currentPlayer) throws JsonProcessingException {
+        List<StructureRecord> neutralStructure = dtoUtil.structureRecordRepository.findStructureRecordsByGameAndPlayer(game, null);
+        return new GameDTO(game.getId(), toPlayerDTO(game.getPlayer1()), toPlayerDTO(game.getPlayer2()), shopDTO, round, currentPlayer, DTOUtil.toStructureDTOs(neutralStructure));
     }
 }

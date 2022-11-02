@@ -80,7 +80,7 @@ public class GameServiceImpl implements GameService {
         Game game = archive.getGame();
         GameRecord last = gameRecordRepository.findFirstByGameOrderByIdDesc(game);
         if (last == null) {
-            return DTOUtil.toGameDTO(game.getId(), game.getPlayer1(), game.getPlayer2(), 1, game.getPlayerFirst(), null);
+            return DTOUtil.toGameDTO(game, null, 1, game.getPlayerFirst());
         }
         Game oldGame = last.getGame();
         Game newGame = Game.builder().playerFirst(oldGame.getPlayerFirst()).map(oldGame.getMap()).build();
@@ -117,7 +117,7 @@ public class GameServiceImpl implements GameService {
             currentPlayer = last.getRound() % 2 == 0;
         else
             currentPlayer = last.getRound() % 2 == 1;
-        return DTOUtil.toGameDTO(newGame.getId(), newPlayer1, newPlayer2, last.getRound() / 2, currentPlayer, null);
+        return DTOUtil.toGameDTO(newGame, null, last.getRound() / 2, currentPlayer);
     }
 
     @Override
@@ -167,19 +167,19 @@ public class GameServiceImpl implements GameService {
         characterRecordRepository.save(character2);
 
         // TODO: relic
-        StructureRecord relic1 = StructureRecord.builder().structureClass(StructureClass.RELIC).build();
-        structureRecordRepository.save(relic1);
+        StructureRecord relic1 = StructureRecord.builder().game(game).structureClass(StructureClass.RELIC).build();
+        relic1 = structureRecordRepository.save(relic1);
 
         // TODO: village
-        StructureRecord village1 = StructureRecord.builder().structureClass(StructureClass.VILLAGE).build();
+        StructureRecord village1 = StructureRecord.builder().game(game).structureClass(StructureClass.VILLAGE).build();
         List<CharacterDTO> characterDTOS = new ArrayList<>(3);
         for (int j = 0; j < 3; j++) {
             characterDTOS.add(DTOUtil.toCharacterDTO(randomCharacter()));
         }
         village1.setCharacter(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(characterDTOS));
-        structureRecordRepository.save(village1);
+        village1 = structureRecordRepository.save(village1);
 
-        return DTOUtil.toGameDTO(game.getId(), player1, player2, 1, game.getPlayerFirst(), null);
+        return DTOUtil.toGameDTO(game, null, 1, game.getPlayerFirst());
     }
 
     @Override
@@ -194,7 +194,7 @@ public class GameServiceImpl implements GameService {
         /*every round get some star*/
         player1.setStars(player1.getStars() + 3);
 
-        List<StructureRecord> player1Structures = structureRecordRepository.findStructureRecordByPlayerAndHpGreaterThan(player1, 0);
+        List<StructureRecord> player1Structures = structureRecordRepository.findStructureRecordsByPlayer(player1);
         List<CharacterRecord> characterRecords = characterRecordRepository.findCharacterRecordsByPlayer(player1);
         for (CharacterRecord c : characterRecords) {
             if (c.getHp() > 0) {
@@ -338,7 +338,7 @@ public class GameServiceImpl implements GameService {
         List<ShopRecord> shopRecords2 = shopRecordRepository.findShopRecordsByPlayerAndRound(player2, round - 1);
         if (shopRecords2 != null)
             player2.getShopRecords().addAll(shopRecords2);
-        return DTOUtil.toGameDTO(game.getId(), game.getPlayer1(), game.getPlayer2(), round, currentPlayer, shopDTO);
+        return DTOUtil.toGameDTO(game, shopDTO, round, currentPlayer);
     }
 
     private int prosperityDegree(Player player) {

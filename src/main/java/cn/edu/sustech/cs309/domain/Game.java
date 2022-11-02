@@ -52,4 +52,10 @@ public class Game {
     @ToString.Exclude
     @Builder.Default
     private List<GameRecord> gameRecords = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "game", cascade = CascadeType.REMOVE)
+    @ToString.Exclude
+    @Builder.Default
+    private List<StructureRecord> structureRecords = new ArrayList<>();
 }
