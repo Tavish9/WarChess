@@ -6,6 +6,7 @@ import cn.edu.sustech.cs309.repository.EquipmentRecordRepository;
 import cn.edu.sustech.cs309.repository.ItemRecordRepository;
 import cn.edu.sustech.cs309.repository.MountRecordRepository;
 import cn.edu.sustech.cs309.repository.StructureRecordRepository;
+import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,11 +54,11 @@ public class DTOUtil {
         return new ArchiveDTO(archive.getId(), archive.getGame().getId(), toPlayerDTO(archive.getGame().getPlayer1()));
     }
 
-    public static List<ArchiveDTO> toArchiveDTOs(List<Archive> archices) throws JsonProcessingException {
-        if (archices == null)
+    public static List<ArchiveDTO> toArchiveDTOs(List<Archive> archives) throws JsonProcessingException {
+        if (archives == null)
             return null;
-        List<ArchiveDTO> archiveDTOS = new ArrayList<>(archices.size());
-        for (Archive a : archices) {
+        List<ArchiveDTO> archiveDTOS = new ArrayList<>(archives.size());
+        for (Archive a : archives) {
             archiveDTOS.add(DTOUtil.toArchiveDTO(a));
         }
         return archiveDTOS;
@@ -66,7 +67,8 @@ public class DTOUtil {
     public static CharacterDTO toCharacterDTO(CharacterRecord character) {
         return new CharacterDTO(character.getId(), character.getName(), character.getCharacterClass(),
                 character.getActionRange(), character.getAttack(), character.getDefense(), character.getHp(),
-                character.getLevel(), toEquipmentDTO(character.getEquipmentRecord()), toMountDTO(character.getMountRecord()));
+                character.getLevel(), character.getX(), character.getY(),
+                toEquipmentDTO(character.getEquipmentRecord()), toMountDTO(character.getMountRecord()));
     }
 
     public static List<CharacterDTO> toCharacterDTOs(List<CharacterRecord> characterRecords) {
@@ -174,6 +176,7 @@ public class DTOUtil {
 
     public static GameDTO toGameDTO(Game game, ShopDTO shopDTO, int round, boolean currentPlayer) throws JsonProcessingException {
         List<StructureRecord> neutralStructure = dtoUtil.structureRecordRepository.findStructureRecordsByGameAndPlayer(game, null);
-        return new GameDTO(game.getId(), toPlayerDTO(game.getPlayer1()), toPlayerDTO(game.getPlayer2()), shopDTO, round, currentPlayer, DTOUtil.toStructureDTOs(neutralStructure));
+        return new GameDTO(game.getId(), toPlayerDTO(game.getPlayer1()), toPlayerDTO(game.getPlayer2()), shopDTO, round,
+                currentPlayer, DTOUtil.toStructureDTOs(neutralStructure), JSON.parseObject(game.getMap().getData(), int[][].class));
     }
 }
