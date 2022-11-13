@@ -66,8 +66,8 @@ public class DTOUtil {
 
     public static CharacterDTO toCharacterDTO(CharacterRecord character) {
         return new CharacterDTO(character.getId(), character.getName(), character.getCharacterClass(),
-                character.getActionRange(), character.getAttack(), character.getDefense(), character.getHp(),
-                character.getLevel(), character.getX(), character.getY(),
+                character.getActionState(), character.getActionRange(), character.getAttack(), character.getDefense(),
+                character.getHp(), character.getLevel(), character.getX(), character.getY(),
                 toEquipmentDTO(character.getEquipmentRecord()), toMountDTO(character.getMountRecord()));
     }
 
