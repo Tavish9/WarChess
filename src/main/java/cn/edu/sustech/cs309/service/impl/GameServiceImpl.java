@@ -1,5 +1,6 @@
 package cn.edu.sustech.cs309.service.impl;
 
+import cn.edu.sustech.cs309.domain.Map;
 import cn.edu.sustech.cs309.domain.*;
 import cn.edu.sustech.cs309.dto.ArchiveDTO;
 import cn.edu.sustech.cs309.dto.CharacterDTO;
@@ -8,6 +9,7 @@ import cn.edu.sustech.cs309.dto.ShopDTO;
 import cn.edu.sustech.cs309.repository.*;
 import cn.edu.sustech.cs309.service.GameService;
 import cn.edu.sustech.cs309.utils.DTOUtil;
+import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +61,9 @@ public class GameServiceImpl implements GameService {
 
     @Autowired
     private ShopRecordRepository shopRecordRepository;
+
+    @Autowired
+    private MapRepository mapRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -132,8 +137,9 @@ public class GameServiceImpl implements GameService {
         if (account1 == null)
             throw new RuntimeException("Account does not exist");
         Random random = new Random();
-        // TODO: specify the map
-        Game game = Game.builder().playerFirst(random.nextBoolean()).build();
+        int totalMapSize = mapRepository.countAll();
+        Map map = mapRepository.findMapById(random.nextInt(totalMapSize));
+        Game game = Game.builder().playerFirst(random.nextBoolean()).map(map).build();
         gameRepository.save(game);
         Player player1 = Player.builder().account(account1).game(game).build();
         Player player2 = Player.builder().account(Objects.requireNonNullElse(account2, account1)).game(game).build();
@@ -149,35 +155,47 @@ public class GameServiceImpl implements GameService {
         game.setPlayer2(player2);
         game = gameRepository.save(game);
 
-        // TODO: character position
         CharacterRecord character1 = randomCharacter();
         int type1 = (character1.getAttack() + character1.getDefense() + character1.getHp()) % 3;
         character1.updateAttribute(type1);
-//        character1.setX();
-//        character1.setY();
+        if (!random.nextBoolean()) {
+            character1.setX(0);
+            character1.setY(16);
+        } else {
+            character1.setX(16);
+            character1.setY(0);
+        }
         character1.setPlayer(player1);
         characterRecordRepository.save(character1);
 
         CharacterRecord character2 = randomCharacter();
         int type2 = (character1.getAttack() + character1.getDefense() + character1.getHp()) % 3;
         character2.updateAttribute(type2);
-//        character2.setX();
-//        character2.setY();
+        if (character1.getX() == 0) {
+            character2.setX(16);
+            character2.setY(0);
+        } else {
+            character2.setX(0);
+            character2.setY(16);
+        }
         character2.setPlayer(player2);
         characterRecordRepository.save(character2);
 
-        // TODO: relic
-        StructureRecord relic1 = StructureRecord.builder().game(game).structureClass(StructureClass.RELIC).build();
-        relic1 = structureRecordRepository.save(relic1);
+        // TODO: random structure position
+        int[][] mapInt = JSON.parseObject(map.getData(), int[][].class);
+        // (mapInt[i][j]>>2)&3  0空地 1山 2水 3树
+        // village 可以在0   relic可以在0 1 3
 
-        // TODO: village
-        StructureRecord village1 = StructureRecord.builder().game(game).structureClass(StructureClass.VILLAGE).build();
-        List<CharacterDTO> characterDTOS = new ArrayList<>(3);
-        for (int j = 0; j < 3; j++) {
-            characterDTOS.add(DTOUtil.toCharacterDTO(randomCharacter()));
-        }
-        village1.setCharacter(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(characterDTOS));
-        village1 = structureRecordRepository.save(village1);
+        // StructureRecord relic = StructureRecord.builder().game(game).structureClass(StructureClass.RELIC).x(i).y(j).build();
+        // structureRecordRepository.save(relic);
+
+//        StructureRecord village = StructureRecord.builder().game(game).structureClass(StructureClass.VILLAGE).x(i).y(j).build();
+//        List<CharacterDTO> characterDTOS = new ArrayList<>(3);
+//        for (int k = 0; k < 3; k++) {
+//            characterDTOS.add(DTOUtil.toCharacterDTO(randomCharacter()));
+//        }
+//        village.setCharacter(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(characterDTOS));
+//        structureRecordRepository.save(village);
 
         return DTOUtil.toGameDTO(game, null, 1, game.getPlayerFirst());
     }
