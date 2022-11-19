@@ -90,7 +90,6 @@ public class CharacterServiceImpl implements CharacterService {
             characterRecord_attacked.setHp(Math.max(0,newHp));
             characterRecordRepository.save(characterRecord_attacked);
             if (newHp<=0){
-                //TODO:update structure at position character .x.y
                 int x=characterRecord_attacked.getX(),y=characterRecord_attacked.getY();
                 List<StructureRecord> structureRecords = structureRecordRepository.findStructureRecordsByPlayer(characterRecord_attacked.getPlayer());
                 for (StructureRecord s:structureRecords){
