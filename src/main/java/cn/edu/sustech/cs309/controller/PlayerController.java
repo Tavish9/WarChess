@@ -103,7 +103,7 @@ public class PlayerController {
     @ApiOperation(value = "购买players商店对应的坐骑")
     @PostMapping(value = "/player/{playerid}/mount")
     public ResponseResult<?> buyMounts(@PathVariable("playerid") Integer playerId,
-                                       @RequestParam("shopId") Integer shopId) {
+                                       @RequestParam("shopid") Integer shopId) {
         if (playerId <= 0 || shopId <= 0)
             throw new RuntimeException("Invalid input");
         return ResponseResult.success(playerService.buyMount(playerId, shopId));
@@ -112,7 +112,7 @@ public class PlayerController {
     @ApiOperation(value = "购买players商店对应的道具")
     @PostMapping(value = "/player/{playerid}/item")
     public ResponseResult<?> buyItems(@PathVariable("playerid") Integer playerId,
-                                      @RequestParam("shopId") Integer shopId) {
+                                      @RequestParam("shopid") Integer shopId) {
         if (playerId <= 0 || shopId <= 0)
             throw new RuntimeException("Invalid input");
         return ResponseResult.success(playerService.buyItem(playerId, shopId));
