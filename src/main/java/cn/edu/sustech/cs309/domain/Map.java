@@ -41,5 +41,6 @@ public class Map {
     @Builder.Default
     private List<Game> games = new ArrayList<>();
 
+    @Lob
     private String data;
 }

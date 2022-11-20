@@ -12,6 +12,9 @@ import cn.edu.sustech.cs309.utils.DTOUtil;
 import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javassist.expr.NewArray;
+import lombok.extern.java.Log;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -127,6 +130,8 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public GameDTO ini(String username1, String username2) throws JsonProcessingException {
+        Map map1 = Map.builder().data("[[0,0,0,3,3,2,0,3,2,3,2,2,2,0,2,0,0],[2,0,0,0,2,0,0,3,1,0,3,2,0,0,0,0,2],[3,2,2,0,0,2,2,0,0,0,0,0,0,0,0,2,0],[3,0,0,0,2,2,2,0,0,0,3,3,1,0,1,2,2],[3,3,0,0,0,0,2,3,0,0,0,3,3,0,0,0,0],[2,2,2,3,3,0,3,3,3,0,3,3,0,0,0,0,2],[2,0,0,3,1,3,2,2,2,0,0,0,0,0,0,0,0],[2,0,0,0,0,0,2,0,0,0,3,3,0,0,2,2,2],[0,2,0,0,0,0,2,1,0,0,1,2,2,2,2,0,0],[0,0,0,0,0,0,0,0,0,2,2,2,2,3,0,0,2],[0,0,0,0,2,0,0,0,2,2,2,2,0,0,3,0,0],[3,0,2,2,1,0,0,0,2,0,3,2,0,0,0,0,2],[3,0,0,3,1,0,3,3,2,0,0,3,2,3,0,3,0],[0,0,1,0,0,0,0,3,2,0,0,2,3,3,0,0,2],[0,0,0,0,0,3,3,0,2,2,2,2,1,3,0,0,0],[0,0,0,0,2,3,0,0,0,2,1,1,0,0,0,0,2],[0,0,0,0,2,2,0,2,0,0,2,0,0,0,0,0,0]]").build();
+        mapRepository.save(map1);
         Account account2 = null;
         if (StringUtils.hasText(username2)) {
             account2 = accountRepository.findAccountByUsername(username2);
@@ -138,9 +143,9 @@ public class GameServiceImpl implements GameService {
             throw new RuntimeException("Account does not exist");
         Random random = new Random();
         int totalMapSize = mapRepository.countAll();
-        Map map = mapRepository.findMapById(random.nextInt(totalMapSize));
+        Map map = mapRepository.findMapById(random.nextInt(totalMapSize)+1);
         Game game = Game.builder().playerFirst(random.nextBoolean()).map(map).build();
-        gameRepository.save(game);
+        game = gameRepository.save(game);
         Player player1 = Player.builder().account(account1).game(game).build();
         Player player2 = Player.builder().account(Objects.requireNonNullElse(account2, account1)).game(game).build();
         StringBuilder stringBuilder = new StringBuilder();
@@ -181,21 +186,50 @@ public class GameServiceImpl implements GameService {
         character2.setPlayer(player2);
         characterRecordRepository.save(character2);
 
-        // TODO: random structure position
+        ArrayList<Pair<Integer, Integer>>position= new ArrayList<Pair<Integer, Integer> >();
+
         int[][] mapInt = JSON.parseObject(map.getData(), int[][].class);
+        for (int i=0;i<mapInt.length;i++){
+            for (int j=0;j<mapInt[i].length;j++){
+                if (mapInt[i][j]!=2){
+                    if (i==0&&j==15)continue;
+                    if (i==15&&j==0)continue;
+                    position.add(Pair.of(i,j));
+                }
+            }
+        }
+        int villageCount=20,relicCount=4,inithp=10;
+        Collections.shuffle(position);
         // (mapInt[i][j]>>2)&3  0空地 1山 2水 3树
         // village 可以在0   relic可以在0 1 3
+        for (int k=0;k<position.size();k++){
+            int x= position.get(k).getLeft(),y=position.get(k).getRight();
+            if (mapInt[x][y]==0){
+                if (villageCount>0){
+                    StructureRecord structureRecord=StructureRecord.builder().x(x).y(y).hp(inithp).level(0).game(game).remainingRound(0).build();
+                    List<CharacterDTO> characterDTOS = new ArrayList<>(3);
+                    for (int t = 0; t < 3; t++) {
+                        characterDTOS.add(DTOUtil.toCharacterDTO(randomCharacter()));
+                    }
+                    structureRecord.setCharacter(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(characterDTOS));
+                    structureRecordRepository.save(structureRecord);
 
-        // StructureRecord relic = StructureRecord.builder().game(game).structureClass(StructureClass.RELIC).x(i).y(j).build();
-        // structureRecordRepository.save(relic);
-
-//        StructureRecord village = StructureRecord.builder().game(game).structureClass(StructureClass.VILLAGE).x(i).y(j).build();
-//        List<CharacterDTO> characterDTOS = new ArrayList<>(3);
-//        for (int k = 0; k < 3; k++) {
-//            characterDTOS.add(DTOUtil.toCharacterDTO(randomCharacter()));
-//        }
-//        village.setCharacter(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(characterDTOS));
-//        structureRecordRepository.save(village);
+                    villageCount-=1;
+                }
+                else if (relicCount>0){
+                    StructureRecord structureRecord=StructureRecord.builder().x(x).y(y).hp(inithp).level(0).game(game).remainingRound(0).structureClass(StructureClass.RELIC).build();
+                    structureRecordRepository.save(structureRecord);
+                    relicCount-=1;
+                }
+            }
+            else{
+                if (relicCount>0){
+                    StructureRecord structureRecord=StructureRecord.builder().x(x).y(y).hp(inithp).level(0).game(game).remainingRound(0).structureClass(StructureClass.RELIC).build();
+                    structureRecordRepository.save(structureRecord);
+                    relicCount-=1;
+                }
+            }
+        }
 
         return DTOUtil.toGameDTO(game, null, 1, game.getPlayerFirst());
     }
