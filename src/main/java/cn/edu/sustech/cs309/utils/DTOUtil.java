@@ -51,7 +51,7 @@ public class DTOUtil {
     }
 
     public static ArchiveDTO toArchiveDTO(Archive archive) throws JsonProcessingException {
-        return new ArchiveDTO(archive.getId(), archive.getGame().getId(), toPlayerDTO(archive.getGame().getPlayer1()));
+        return new ArchiveDTO(archive.getId(), archive.getGame().getId(), toPlayerDTO(archive.getGame().getPlayers().get(0)));
     }
 
     public static List<ArchiveDTO> toArchiveDTOs(List<Archive> archives) throws JsonProcessingException {
@@ -65,6 +65,8 @@ public class DTOUtil {
     }
 
     public static CharacterDTO toCharacterDTO(CharacterRecord character) {
+        if (character == null)
+            return null;
         return new CharacterDTO(character.getId(), character.getName(), character.getCharacterClass(),
                 character.getActionState(), character.getActionRange(), character.getAttack(), character.getDefense(),
                 character.getHp(), character.getLevel(), character.getX(), character.getY(),
@@ -80,6 +82,8 @@ public class DTOUtil {
     }
 
     public static EquipmentDTO toEquipmentDTO(EquipmentRecord equipment) {
+        if (equipment == null)
+            return null;
         Equipment e = equipment.getEquipment();
         return new EquipmentDTO(equipment.getId(), e.getName(), e.getEquipmentClass(),
                 e.getAttack(), e.getDefense(), e.getAttackRange(), e.getDescription());
@@ -94,6 +98,8 @@ public class DTOUtil {
     }
 
     public static ItemDTO toItemDTO(ItemRecord item) {
+        if (item == null)
+            return null;
         Item i = item.getItem();
         return new ItemDTO(item.getId(), i.getName(), i.getAttack(), i.getDefense(), i.getHp(), i.getDescription());
     }
@@ -107,6 +113,8 @@ public class DTOUtil {
     }
 
     public static MountDTO toMountDTO(MountRecord mount) {
+        if (mount == null)
+            return null;
         Mount m = mount.getMount();
         return new MountDTO(mount.getId(), m.getName(), m.getAttack(), m.getDefense(), m.getActionRange(), m.getDescription());
     }
@@ -120,6 +128,8 @@ public class DTOUtil {
     }
 
     public static StructureDTO toStructureDTO(StructureRecord structure) throws JsonProcessingException {
+        if (structure == null)
+            return null;
         List<CharacterDTO> characterDTOS;
         if (structure.getCharacter() == null) {
             characterDTOS = null;
@@ -176,7 +186,7 @@ public class DTOUtil {
 
     public static GameDTO toGameDTO(Game game, ShopDTO shopDTO, int round, boolean currentPlayer) throws JsonProcessingException {
         List<StructureRecord> neutralStructure = dtoUtil.structureRecordRepository.findStructureRecordsByGameAndPlayer(game, null);
-        return new GameDTO(game.getId(), toPlayerDTO(game.getPlayer1()), toPlayerDTO(game.getPlayer2()), shopDTO, round,
+        return new GameDTO(game.getId(), toPlayerDTO(game.getPlayers().get(0)), toPlayerDTO(game.getPlayers().get(1)), shopDTO, round,
                 currentPlayer, DTOUtil.toStructureDTOs(neutralStructure), JSON.parseObject(game.getMap().getData(), int[][].class));
     }
 }
