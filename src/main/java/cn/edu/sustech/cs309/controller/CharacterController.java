@@ -2,6 +2,7 @@ package cn.edu.sustech.cs309.controller;
 
 import cn.edu.sustech.cs309.domain.ResponseResult;
 import cn.edu.sustech.cs309.service.CharacterService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +50,7 @@ public class CharacterController {
     @ApiOperation(value = "角色攻击建筑")
     @PutMapping("/character/{characterid}/structure")
     public ResponseResult<?> attackStructure(@PathVariable("characterid") Integer characterId,
-                                             @RequestParam("attackid") Integer attackId) {
+                                             @RequestParam("attackid") Integer attackId) throws JsonProcessingException {
         return ResponseResult.success(characterService.attackStructure(characterId, attackId));
     }
 }

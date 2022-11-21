@@ -12,8 +12,6 @@ import cn.edu.sustech.cs309.utils.DTOUtil;
 import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import javassist.expr.NewArray;
-import lombok.extern.java.Log;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -92,9 +90,9 @@ public class GameServiceImpl implements GameService {
         }
         Game oldGame = last.getGame();
         Game newGame = Game.builder().playerFirst(oldGame.getPlayerFirst()).map(oldGame.getMap()).build();
-        newGame = gameRepository.save(newGame);
-        Player oldPlayer1 = oldGame.getPlayer1();
-        Player oldPlayer2 = oldGame.getPlayer2();
+        gameRepository.save(newGame);
+        Player oldPlayer1 = oldGame.getPlayers().get(0);
+        Player oldPlayer2 = oldGame.getPlayers().get(1);
         Player newPlayer1 = Player.builder()
                 .account(oldPlayer1.getAccount())
                 .stars(oldPlayer1.getStars())
@@ -114,11 +112,11 @@ public class GameServiceImpl implements GameService {
                 .techtreeFeasible(oldPlayer2.getTechtreeFeasible())
                 .techtreeRemainRound(oldPlayer2.getTechtreeRemainRound())
                 .vision(oldPlayer2.getVision()).build();
-        newPlayer1 = playerRepository.save(newPlayer1);
-        newPlayer2 = playerRepository.save(newPlayer2);
-        newGame.setPlayer1(newPlayer1);
-        newGame.setPlayer2(newPlayer2);
-        newGame = gameRepository.save(newGame);
+        playerRepository.save(newPlayer1);
+        playerRepository.save(newPlayer2);
+        newGame.getPlayers().add(newPlayer1);
+        newGame.getPlayers().add(newPlayer2);
+        gameRepository.save(newGame);
         // TODO: copy data
         boolean currentPlayer;
         if (game.getPlayerFirst())
@@ -130,8 +128,8 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public GameDTO ini(String username1, String username2) throws JsonProcessingException {
-        Map map1 = Map.builder().data("[[0,0,0,3,3,2,0,3,2,3,2,2,2,0,2,0,0],[2,0,0,0,2,0,0,3,1,0,3,2,0,0,0,0,2],[3,2,2,0,0,2,2,0,0,0,0,0,0,0,0,2,0],[3,0,0,0,2,2,2,0,0,0,3,3,1,0,1,2,2],[3,3,0,0,0,0,2,3,0,0,0,3,3,0,0,0,0],[2,2,2,3,3,0,3,3,3,0,3,3,0,0,0,0,2],[2,0,0,3,1,3,2,2,2,0,0,0,0,0,0,0,0],[2,0,0,0,0,0,2,0,0,0,3,3,0,0,2,2,2],[0,2,0,0,0,0,2,1,0,0,1,2,2,2,2,0,0],[0,0,0,0,0,0,0,0,0,2,2,2,2,3,0,0,2],[0,0,0,0,2,0,0,0,2,2,2,2,0,0,3,0,0],[3,0,2,2,1,0,0,0,2,0,3,2,0,0,0,0,2],[3,0,0,3,1,0,3,3,2,0,0,3,2,3,0,3,0],[0,0,1,0,0,0,0,3,2,0,0,2,3,3,0,0,2],[0,0,0,0,0,3,3,0,2,2,2,2,1,3,0,0,0],[0,0,0,0,2,3,0,0,0,2,1,1,0,0,0,0,2],[0,0,0,0,2,2,0,2,0,0,2,0,0,0,0,0,0]]").build();
-        mapRepository.save(map1);
+//        Map map1 = Map.builder().data("[[0,0,0,3,3,2,0,3,2,3,2,2,2,0,2,0,0],[2,0,0,0,2,0,0,3,1,0,3,2,0,0,0,0,2],[3,2,2,0,0,2,2,0,0,0,0,0,0,0,0,2,0],[3,0,0,0,2,2,2,0,0,0,3,3,1,0,1,2,2],[3,3,0,0,0,0,2,3,0,0,0,3,3,0,0,0,0],[2,2,2,3,3,0,3,3,3,0,3,3,0,0,0,0,2],[2,0,0,3,1,3,2,2,2,0,0,0,0,0,0,0,0],[2,0,0,0,0,0,2,0,0,0,3,3,0,0,2,2,2],[0,2,0,0,0,0,2,1,0,0,1,2,2,2,2,0,0],[0,0,0,0,0,0,0,0,0,2,2,2,2,3,0,0,2],[0,0,0,0,2,0,0,0,2,2,2,2,0,0,3,0,0],[3,0,2,2,1,0,0,0,2,0,3,2,0,0,0,0,2],[3,0,0,3,1,0,3,3,2,0,0,3,2,3,0,3,0],[0,0,1,0,0,0,0,3,2,0,0,2,3,3,0,0,2],[0,0,0,0,0,3,3,0,2,2,2,2,1,3,0,0,0],[0,0,0,0,2,3,0,0,0,2,1,1,0,0,0,0,2],[0,0,0,0,2,2,0,2,0,0,2,0,0,0,0,0,0]]").build();
+//        mapRepository.save(map1);
         Account account2 = null;
         if (StringUtils.hasText(username2)) {
             account2 = accountRepository.findAccountByUsername(username2);
@@ -143,26 +141,18 @@ public class GameServiceImpl implements GameService {
             throw new RuntimeException("Account does not exist");
         Random random = new Random();
         int totalMapSize = mapRepository.countAll();
-        Map map = mapRepository.findMapById(random.nextInt(totalMapSize)+1);
+        Map map = mapRepository.findMapById(random.nextInt(totalMapSize) + 1);
         Game game = Game.builder().playerFirst(random.nextBoolean()).map(map).build();
-        game = gameRepository.save(game);
+        gameRepository.save(game);
         Player player1 = Player.builder().account(account1).game(game).build();
         Player player2 = Player.builder().account(Objects.requireNonNullElse(account2, account1)).game(game).build();
-        StringBuilder stringBuilder = new StringBuilder();
-        for (String name : Player.name) {
-            stringBuilder.append(Player.map.get(name)[0]).append(", ");
-        }
-        player1.setTechtreeRemainRound(stringBuilder.substring(0, stringBuilder.length() - 2));
-        player2.setTechtreeRemainRound(stringBuilder.substring(0, stringBuilder.length() - 2));
-        playerRepository.save(player1);
-        playerRepository.save(player2);
-        game.setPlayer1(player1);
-        game.setPlayer2(player2);
-        game = gameRepository.save(game);
+        game.getPlayers().add(player1);
+        game.getPlayers().add(player2);
+        gameRepository.save(game);
+        player1 = game.getPlayers().get(0);
+        player2 = game.getPlayers().get(1);
 
         CharacterRecord character1 = randomCharacter();
-        int type1 = (character1.getAttack() + character1.getDefense() + character1.getHp()) % 3;
-        character1.updateAttribute(type1);
         if (!random.nextBoolean()) {
             character1.setX(0);
             character1.setY(16);
@@ -172,10 +162,9 @@ public class GameServiceImpl implements GameService {
         }
         character1.setPlayer(player1);
         characterRecordRepository.save(character1);
+        player1.getCharacterRecords().add(character1);
 
         CharacterRecord character2 = randomCharacter();
-        int type2 = (character1.getAttack() + character1.getDefense() + character1.getHp()) % 3;
-        character2.updateAttribute(type2);
         if (character1.getX() == 0) {
             character2.setX(16);
             character2.setY(0);
@@ -185,28 +174,29 @@ public class GameServiceImpl implements GameService {
         }
         character2.setPlayer(player2);
         characterRecordRepository.save(character2);
+        player2.getCharacterRecords().add(character2);
 
-        ArrayList<Pair<Integer, Integer>>position= new ArrayList<Pair<Integer, Integer> >();
+        ArrayList<Pair<Integer, Integer>> position = new ArrayList<>();
 
         int[][] mapInt = JSON.parseObject(map.getData(), int[][].class);
-        for (int i=0;i<mapInt.length;i++){
-            for (int j=0;j<mapInt[i].length;j++){
-                if (mapInt[i][j]!=2){
-                    if (i==0&&j==15)continue;
-                    if (i==15&&j==0)continue;
-                    position.add(Pair.of(i,j));
+        for (int i = 0; i < mapInt.length; i++) {
+            for (int j = 0; j < mapInt[i].length; j++) {
+                if (mapInt[i][j] != 2) {
+                    if (i == 0 && j == 15) continue;
+                    if (i == 15 && j == 0) continue;
+                    position.add(Pair.of(i, j));
                 }
             }
         }
-        int villageCount=20,relicCount=4,inithp=10;
+        int villageCount = 20, relicCount = 4, inithp = 10;
         Collections.shuffle(position);
-        // (mapInt[i][j]>>2)&3  0空地 1山 2水 3树
-        // village 可以在0   relic可以在0 1 3
-        for (int k=0;k<position.size();k++){
-            int x= position.get(k).getLeft(),y=position.get(k).getRight();
-            if (mapInt[x][y]==0){
-                if (villageCount>0){
-                    StructureRecord structureRecord=StructureRecord.builder().x(x).y(y).hp(inithp).level(0).game(game).remainingRound(0).build();
+        // 0空地 1山 2水 3树
+        // village 可以在0   relic可以在0 1 2 3
+        for (Pair<Integer, Integer> integerIntegerPair : position) {
+            int x = integerIntegerPair.getLeft(), y = integerIntegerPair.getRight();
+            if (mapInt[x][y] == 0) {
+                if (villageCount > 0) {
+                    StructureRecord structureRecord = StructureRecord.builder().x(x).y(y).hp(inithp).level(0).game(game).remainingRound(0).structureClass(StructureClass.VILLAGE).build();
                     List<CharacterDTO> characterDTOS = new ArrayList<>(3);
                     for (int t = 0; t < 3; t++) {
                         characterDTOS.add(DTOUtil.toCharacterDTO(randomCharacter()));
@@ -214,19 +204,17 @@ public class GameServiceImpl implements GameService {
                     structureRecord.setCharacter(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(characterDTOS));
                     structureRecordRepository.save(structureRecord);
 
-                    villageCount-=1;
-                }
-                else if (relicCount>0){
-                    StructureRecord structureRecord=StructureRecord.builder().x(x).y(y).hp(inithp).level(0).game(game).remainingRound(0).structureClass(StructureClass.RELIC).build();
+                    villageCount -= 1;
+                } else if (relicCount > 0) {
+                    StructureRecord structureRecord = StructureRecord.builder().x(x).y(y).hp(inithp).level(0).game(game).remainingRound(0).structureClass(StructureClass.RELIC).build();
                     structureRecordRepository.save(structureRecord);
-                    relicCount-=1;
+                    relicCount -= 1;
                 }
-            }
-            else{
-                if (relicCount>0){
-                    StructureRecord structureRecord=StructureRecord.builder().x(x).y(y).hp(inithp).level(0).game(game).remainingRound(0).structureClass(StructureClass.RELIC).build();
+            } else {
+                if (relicCount > 0) {
+                    StructureRecord structureRecord = StructureRecord.builder().x(x).y(y).hp(inithp).level(0).game(game).remainingRound(0).structureClass(StructureClass.RELIC).build();
                     structureRecordRepository.save(structureRecord);
-                    relicCount-=1;
+                    relicCount -= 1;
                 }
             }
         }
@@ -330,7 +318,7 @@ public class GameServiceImpl implements GameService {
                     .description(equipment.getDescription())
                     .shopClass(ShopClass.EQUIPMENT)
                     .cost(7).propid(equipmentRecord.getId()).build();
-            shopRecord = shopRecordRepository.save(shopRecord);
+            shopRecordRepository.save(shopRecord);
             index[0][i] = shopRecord.getId();
             e.add(equipmentRecord);
 
@@ -342,7 +330,7 @@ public class GameServiceImpl implements GameService {
                     .description(item.getDescription())
                     .shopClass(ShopClass.ITEM)
                     .cost(7).propid(itemRecord.getId()).build();
-            shopRecord = shopRecordRepository.save(shopRecord);
+            shopRecordRepository.save(shopRecord);
             index[1][i] = shopRecord.getId();
             it.add(itemRecord);
 
@@ -354,7 +342,7 @@ public class GameServiceImpl implements GameService {
                     .description(mount.getDescription())
                     .shopClass(ShopClass.MOUNT)
                     .cost(7).propid(mountRecord.getId()).build();
-            shopRecord = shopRecordRepository.save(shopRecord);
+            shopRecordRepository.save(shopRecord);
             index[2][i] = shopRecord.getId();
             m.add(mountRecord);
         }
@@ -363,16 +351,16 @@ public class GameServiceImpl implements GameService {
         boolean currentPlayer;
         Player player2;
         GameRecord gameRecord = GameRecord.builder().game(game).round(round).build();
-        if (player1.getId().equals(game.getPlayer1().getId())) {
+        if (player1.getId().equals(game.getPlayers().get(0).getId())) {
             currentPlayer = true;
-            player2 = game.getPlayer2();
+            player2 = game.getPlayers().get(1);
             player2.setProsperityDegree(prosperityDegree(player2));
             player2.setProsperityDegree(prosperityDegree(player2));
             gameRecord.setPlayer1(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(player1));
             gameRecord.setPlayer2(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(player2));
         } else {
             currentPlayer = false;
-            player2 = game.getPlayer1();
+            player2 = game.getPlayers().get(0);
             player2.setProsperityDegree(prosperityDegree(player2));
             player2.setProsperityDegree(prosperityDegree(player2));
             gameRecord.setPlayer1(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(player2));
@@ -414,9 +402,11 @@ public class GameServiceImpl implements GameService {
         int defense = 3 - tmp1 - tmp2;
         int actionRange = 1;
         int tmp3 = r.nextInt(1000) % 100;
+        int type = (attack + defense + hp) % 3;
         CharacterRecord characterRecord = CharacterRecord.builder()
                 .name(CharacterRecord.characterName[tmp3]).actionRange(actionRange)
                 .hp(hp).attack(attack).defense(defense).build();
+        characterRecord.updateAttribute(type);
         return characterRecordRepository.save(characterRecord);
     }
 
@@ -441,8 +431,7 @@ public class GameServiceImpl implements GameService {
         int id = r.nextInt(1, tmp + 1);
         Equipment equipment = equipmentRepository.findEquipmentById(id);
         EquipmentRecord equipmentRecord = EquipmentRecord.builder().equipment(equipment).build();
-        equipmentRecord = equipmentRecordRepository.save(equipmentRecord);
-        return equipmentRecord;
+        return equipmentRecordRepository.save(equipmentRecord);
     }
 
     private MountRecord randomMountRecord(Player player) {
@@ -463,8 +452,7 @@ public class GameServiceImpl implements GameService {
         int id = r.nextInt(1, tmp + 1);
         Mount mount = mountRepository.findMountById(id);
         MountRecord mountRecord = MountRecord.builder().mount(mount).build();
-        mountRecord = mountRecordRepository.save(mountRecord);
-        return mountRecord;
+        return mountRecordRepository.save(mountRecord);
     }
 
 
@@ -486,7 +474,6 @@ public class GameServiceImpl implements GameService {
         int id = r.nextInt(1, tmp + 1);
         Item item = itemRepository.findItemById(id);
         ItemRecord itemRecord = ItemRecord.builder().item(item).build();
-        itemRecord = itemRecordRepository.save(itemRecord);
-        return itemRecord;
+        return itemRecordRepository.save(itemRecord);
     }
 }

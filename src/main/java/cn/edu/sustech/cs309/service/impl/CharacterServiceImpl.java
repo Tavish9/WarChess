@@ -5,11 +5,13 @@ import cn.edu.sustech.cs309.domain.Player;
 import cn.edu.sustech.cs309.domain.StructureClass;
 import cn.edu.sustech.cs309.domain.StructureRecord;
 import cn.edu.sustech.cs309.dto.CharacterDTO;
+import cn.edu.sustech.cs309.dto.StructureDTO;
 import cn.edu.sustech.cs309.repository.CharacterRecordRepository;
 import cn.edu.sustech.cs309.repository.PlayerRepository;
 import cn.edu.sustech.cs309.repository.StructureRecordRepository;
 import cn.edu.sustech.cs309.service.CharacterService;
 import cn.edu.sustech.cs309.utils.DTOUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,7 +46,7 @@ public class CharacterServiceImpl implements CharacterService {
         CharacterRecord characterRecord = characterRecordRepository.findCharacterRecordById(characterId);
         if (characterRecord != null) {
             characterRecord.setPlayer(null);
-            characterRecord = characterRecordRepository.save(characterRecord);
+            characterRecordRepository.save(characterRecord);
             return DTOUtil.toCharacterDTO(characterRecord);
         } else
             throw new RuntimeException("character does not exist");
@@ -63,7 +65,7 @@ public class CharacterServiceImpl implements CharacterService {
         characterRecord.setY(y);
         characterRecord.setActionState(1);
         log.debug("move " + characterId + " to (" + x + "," + y + ")");
-        characterRecord = characterRecordRepository.save(characterRecord);
+        characterRecordRepository.save(characterRecord);
         return DTOUtil.toCharacterDTO(characterRecord);
     }
 
@@ -77,24 +79,24 @@ public class CharacterServiceImpl implements CharacterService {
             throw new RuntimeException("attacker is dead");
         if (characterRecord_attacked == null)
             throw new RuntimeException("character attacked does not exist");
-        if (characterRecord_attacked.getPlayer()==null)
+        if (characterRecord_attacked.getPlayer() == null)
             throw new RuntimeException("character attacked is dismissed");
         if (characterRecord_attacked.getHp() <= 0)
             throw new RuntimeException("character attacked is dead");
         if (characterRecord_attack.getActionState() == 2)
             throw new RuntimeException("character can't attack in this round");
         characterRecord_attack.setActionState(2);
-        characterRecord_attack = characterRecordRepository.save(characterRecord_attack);
+        characterRecordRepository.save(characterRecord_attack);
         if (characterRecord_attack.getAttack() > characterRecord_attacked.getDefense()) {
             int newHp = characterRecord_attacked.getHp() - characterRecord_attack.getAttack() + characterRecord_attacked.getDefense();
-            characterRecord_attacked.setHp(Math.max(0,newHp));
+            characterRecord_attacked.setHp(Math.max(0, newHp));
             characterRecordRepository.save(characterRecord_attacked);
-            if (newHp<=0){
-                int x=characterRecord_attacked.getX(),y=characterRecord_attacked.getY();
+            if (newHp <= 0) {
+                int x = characterRecord_attacked.getX(), y = characterRecord_attacked.getY();
                 List<StructureRecord> structureRecords = structureRecordRepository.findStructureRecordsByPlayer(characterRecord_attacked.getPlayer());
-                for (StructureRecord s:structureRecords){
-                    if (s.getX().equals(x)&&s.getY().equals(y)){
-                        if (s.getStructureClass()==StructureClass.INSTITUTE && s.getRemainingRound()>0){
+                for (StructureRecord s : structureRecords) {
+                    if (s.getX().equals(x) && s.getY().equals(y)) {
+                        if (s.getStructureClass() == StructureClass.INSTITUTE && s.getRemainingRound() > 0) {
                             Player player = s.getPlayer();
                             String techTreeRemainRound = player.getTechtreeRemainRound();
                             String[] remain = techTreeRemainRound.split(", ");
@@ -111,11 +113,11 @@ public class CharacterServiceImpl implements CharacterService {
                 }
             }
         }
-        return DTOUtil.toCharacterDTO(characterRecord_attack);
+        return DTOUtil.toCharacterDTO(characterRecord_attacked);
     }
 
     @Override
-    public CharacterDTO attackStructure(Integer characterId, Integer attackId) {
+    public StructureDTO attackStructure(Integer characterId, Integer attackId) throws JsonProcessingException {
         CharacterRecord character = characterRecordRepository.findCharacterRecordById(characterId);
         StructureRecord structure = structureRecordRepository.findStructureRecordById(attackId);
         if (character == null)
@@ -129,7 +131,7 @@ public class CharacterServiceImpl implements CharacterService {
         if (character.getActionState() == 2)
             throw new RuntimeException("character can't attack in this round");
         character.setActionState(2);
-        character = characterRecordRepository.save(character);
+        characterRecordRepository.save(character);
 
         int newHp = structure.getHp() - character.getAttack();
         if (newHp > 0)
@@ -151,7 +153,7 @@ public class CharacterServiceImpl implements CharacterService {
             structure.setRemainingRound(0);
         }
         structureRecordRepository.save(structure);
-        return DTOUtil.toCharacterDTO(character);
+        return DTOUtil.toStructureDTO(structure);
     }
 
 }

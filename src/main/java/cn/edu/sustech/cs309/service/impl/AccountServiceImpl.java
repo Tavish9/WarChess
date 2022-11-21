@@ -33,7 +33,7 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
         } else {
             account = Account.builder().username(username).password(passwordEncoder.encode(password)).build();
             log.debug("create account: " + account);
-            account = accountRepository.save(account);
+            accountRepository.save(account);
             return DTOUtil.toAccountDTO(account, null);
         }
     }
@@ -48,7 +48,7 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
         } else {
             account.setPassword(passwordEncoder.encode(newPassword));
             log.debug("update password:" + account);
-            account = accountRepository.save(account);
+            accountRepository.save(account);
             return DTOUtil.toAccountDTO(account, null);
         }
     }

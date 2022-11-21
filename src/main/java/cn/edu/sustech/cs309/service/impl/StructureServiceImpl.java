@@ -88,7 +88,7 @@ public class StructureServiceImpl implements StructureService {
 
         characterDTOS.remove(characterDTO_add);
         structureRecord.setCharacter(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(characterDTOS));
-        structureRecord = structureRecordRepository.save(structureRecord);
+        structureRecordRepository.save(structureRecord);
         player.setStars(player.getStars() - 3);
         playerRepository.save(player);
         characterRecord.updateAttribute(type);
@@ -121,7 +121,7 @@ public class StructureServiceImpl implements StructureService {
 
         structureRecord.setValue(v);
         structureRecord.setRemainingRound(2);
-        structureRecord = structureRecordRepository.save(structureRecord);
+        structureRecordRepository.save(structureRecord);
         return DTOUtil.toStructureDTO(structureRecord);
     }
 
@@ -144,7 +144,7 @@ public class StructureServiceImpl implements StructureService {
         characterRecordRepository.save(characterRecord);
 
         structureRecord.setRemainingRound(1);
-        structureRecord = structureRecordRepository.save(structureRecord);
+        structureRecordRepository.save(structureRecord);
         return DTOUtil.toStructureDTO(structureRecord);
     }
 
@@ -183,7 +183,7 @@ public class StructureServiceImpl implements StructureService {
 
         structureRecord.setValue(v);
         structureRecord.setRemainingRound(Player.map.get(Player.name[v])[0]);
-        structureRecord = structureRecordRepository.save(structureRecord);
+        structureRecordRepository.save(structureRecord);
         return DTOUtil.toStructureDTO(structureRecord);
     }
 

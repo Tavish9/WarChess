@@ -163,8 +163,6 @@ public class PlayerServiceImpl implements PlayerService {
             throw new RuntimeException("Player does not exist");
         List<EquipmentRecord> equipmentRecords = equipmentRecordRepository.findEquipmentRecordByPlayerAndUsed(player, false);
         log.debug("player " + playerId + "get equipment");
-        if (equipmentRecords == null)
-            return null;
         return DTOUtil.toEquipmentDTOs(equipmentRecords);
     }
 
@@ -175,8 +173,6 @@ public class PlayerServiceImpl implements PlayerService {
             throw new RuntimeException("Player does not exist");
         List<MountRecord> mountRecords = mountRecordRepository.findMountRecordByPlayerAndUsed(player, false);
         log.debug("player " + playerId + "get mount");
-        if (mountRecords == null)
-            return null;
         return DTOUtil.toMountDTOs(mountRecords);
     }
 
@@ -187,8 +183,6 @@ public class PlayerServiceImpl implements PlayerService {
             throw new RuntimeException("Player does not exist");
         List<ItemRecord> itemRecords = itemRecordRepository.findItemRecordByPlayerAndUsed(player, false);
         log.debug("player " + playerId + "get item");
-        if (itemRecords == null)
-            return null;
         return DTOUtil.toItemDTOs(itemRecords);
     }
 
