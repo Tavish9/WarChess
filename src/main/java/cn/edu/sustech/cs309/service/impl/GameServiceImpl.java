@@ -179,8 +179,10 @@ public class GameServiceImpl implements GameService {
         ArrayList<Pair<Integer, Integer>> position = new ArrayList<>();
 
         int[][] mapInt = JSON.parseObject(map.getData(), int[][].class);
+        int[][] mark=new int[17][17];
         for (int i = 0; i < mapInt.length; i++) {
             for (int j = 0; j < mapInt[i].length; j++) {
+                mark[i][j]=1;
                 if (mapInt[i][j] != 2) {
                     if (i == 0 && j == 16) continue;
                     if (i == 16 && j == 0) continue;
@@ -196,6 +198,13 @@ public class GameServiceImpl implements GameService {
             int x = integerIntegerPair.getLeft(), y = integerIntegerPair.getRight();
             if (mapInt[x][y] == 0) {
                 if (villageCount > 0) {
+                    boolean flag=true;
+                    for (int i=-2;i<3&&flag;i++)if (0<=x+i&&x+i<17){
+                        for (int j=-2;j<3&&flag;j++)if (0<=y+j&&y+j<17){
+                            if (mark[x+i][y+j]==0)flag=false;
+                        }
+                    }
+                    if (!flag)continue;
                     StructureRecord structureRecord = StructureRecord.builder().x(y).y(x).hp(inithp).level(0).game(game).remainingRound(0).structureClass(StructureClass.VILLAGE).build();
                     List<CharacterDTO> characterDTOS = new ArrayList<>(3);
                     for (int t = 0; t < 3; t++) {
@@ -203,22 +212,70 @@ public class GameServiceImpl implements GameService {
                     }
                     structureRecord.setCharacter(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(characterDTOS));
                     structureRecordRepository.save(structureRecord);
-
                     villageCount -= 1;
+                    mark[x][y]=0;
                 } else if (relicCount > 0) {
+                    boolean flag=true;
+                    for (int i=-6;i<6&&flag;i++)if (0<=x+i&&x+i<17){
+                        for (int j=-6;j<6&&flag;j++)if (0<=y+j&&y+j<17){
+                            if (mark[x+i][y+j]==2)flag=false;
+                        }
+                    }
+                    if (!flag)continue;
+                    if (x+y>5&&x+y<28)continue;
                     StructureRecord structureRecord = StructureRecord.builder().x(y).y(x).hp(inithp).level(0).game(game).remainingRound(0).structureClass(StructureClass.RELIC).build();
                     structureRecordRepository.save(structureRecord);
                     relicCount -= 1;
+                    mark[x][y]=2;
                 }
             } else {
                 if (relicCount > 0) {
+                    boolean flag=true;
+                    for (int i=-6;i<6&&flag;i++)if (0<=x+i&&x+i<17){
+                        for (int j=-6;j<6&&flag;j++)if (0<=y+j&&y+j<17){
+                            if (mark[x+i][y+j]==2)flag=false;
+                        }
+                    }
+                    if (!flag)continue;
+                    if (x+y>5&&x+y<28)continue;
                     StructureRecord structureRecord = StructureRecord.builder().x(y).y(x).hp(inithp).level(0).game(game).remainingRound(0).structureClass(StructureClass.RELIC).build();
                     structureRecordRepository.save(structureRecord);
                     relicCount -= 1;
+                    mark[x][y]=2;
                 }
             }
         }
 
+
+        if (villageCount>0||relicCount>0){
+
+            for (Pair<Integer, Integer> integerIntegerPair : position) {
+                int x = integerIntegerPair.getLeft(), y = integerIntegerPair.getRight();
+                if (mark[x][y]==0||mark[x][y]==2)continue;
+                if (mapInt[x][y] == 0) {
+                    if (villageCount > 0) {StructureRecord structureRecord = StructureRecord.builder().x(y).y(x).hp(inithp).level(0).game(game).remainingRound(0).structureClass(StructureClass.VILLAGE).build();
+                        List<CharacterDTO> characterDTOS = new ArrayList<>(3);
+                        for (int t = 0; t < 3; t++) {
+                            characterDTOS.add(DTOUtil.toCharacterDTO(randomCharacter()));
+                        }
+                        structureRecord.setCharacter(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(characterDTOS));
+                        structureRecordRepository.save(structureRecord);
+                        villageCount -= 1;
+                    } else if (relicCount > 0) {
+                        StructureRecord structureRecord = StructureRecord.builder().x(y).y(x).hp(inithp).level(0).game(game).remainingRound(0).structureClass(StructureClass.RELIC).build();
+                        structureRecordRepository.save(structureRecord);
+                        relicCount -= 1;
+                    }
+                } else {
+                    if (relicCount > 0) {
+                        StructureRecord structureRecord = StructureRecord.builder().x(y).y(x).hp(inithp).level(0).game(game).remainingRound(0).structureClass(StructureClass.RELIC).build();
+                        structureRecordRepository.save(structureRecord);
+                        relicCount -= 1;
+                    }
+                }
+            }
+
+        }
         return DTOUtil.toGameDTO(game, null, 1, game.getPlayerFirst());
     }
 
