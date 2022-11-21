@@ -3,6 +3,7 @@ package cn.edu.sustech.cs309.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+import org.hibernate.annotations.Type;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -42,5 +43,6 @@ public class Map {
     private List<Game> games = new ArrayList<>();
 
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private String data;
 }

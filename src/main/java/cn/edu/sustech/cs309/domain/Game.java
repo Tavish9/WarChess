@@ -2,6 +2,7 @@ package cn.edu.sustech.cs309.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+import org.hibernate.annotations.Cascade;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -32,13 +33,11 @@ public class Game {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updateTime;
 
-    @OneToOne
-    @JoinColumn(name = "player1_id")
-    private Player player1;
-
-    @OneToOne
-    @JoinColumn(name = "player2_id")
-    private Player player2;
+    @JsonIgnore
+    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    @Builder.Default
+    private List<Player> players = new ArrayList<>();
 
     //false means player1 first,otherwise player2 first
     private Boolean playerFirst;

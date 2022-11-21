@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import javax.transaction.Transactional;
 
 public interface MapRepository extends JpaRepository<Map, Integer> {
-    @Transactional
     Map findMapById(Integer id);
 
     @Query(value = "select count(*) from map", nativeQuery = true)

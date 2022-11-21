@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -38,8 +39,10 @@ public class GameRecord {
     private Integer round;
 
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private String player1;
 
     @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private String player2;
 }

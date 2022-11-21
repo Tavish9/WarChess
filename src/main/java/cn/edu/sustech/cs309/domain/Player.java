@@ -3,6 +3,7 @@ package cn.edu.sustech.cs309.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
+import org.hibernate.annotations.Type;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -38,8 +39,7 @@ public class Player {
     @Builder.Default
     private Long stars = 10L;
 
-    @JsonIgnore
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "game_id")
     private Game game;
 
@@ -51,12 +51,16 @@ public class Player {
     @Column(name = "peace_degree")
     private Integer peaceDegree = 0;
 
+    @Builder.Default
     @Column(name = "techtree_feasible")
-    private String techtreeFeasible;
+    private String techtreeFeasible = "1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0";
 
+    @Builder.Default
     @Column(name = "techtree_remain_round")
-    private String techtreeRemainRound;
+    private String techtreeRemainRound = "1, 2, 2, 2, 3, 3, 3, 3, 3, 3, 5";
 
+    @Lob
+    @Type(type = "org.hibernate.type.TextType")
     private String vision;
 
     public static final Map<String, int[]> map = new HashMap<>();
