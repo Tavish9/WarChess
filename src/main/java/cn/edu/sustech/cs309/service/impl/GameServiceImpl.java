@@ -182,8 +182,8 @@ public class GameServiceImpl implements GameService {
         for (int i = 0; i < mapInt.length; i++) {
             for (int j = 0; j < mapInt[i].length; j++) {
                 if (mapInt[i][j] != 2) {
-                    if (i == 0 && j == 15) continue;
-                    if (i == 15 && j == 0) continue;
+                    if (i == 0 && j == 16) continue;
+                    if (i == 16 && j == 0) continue;
                     position.add(Pair.of(i, j));
                 }
             }
@@ -196,7 +196,7 @@ public class GameServiceImpl implements GameService {
             int x = integerIntegerPair.getLeft(), y = integerIntegerPair.getRight();
             if (mapInt[x][y] == 0) {
                 if (villageCount > 0) {
-                    StructureRecord structureRecord = StructureRecord.builder().x(x).y(y).hp(inithp).level(0).game(game).remainingRound(0).structureClass(StructureClass.VILLAGE).build();
+                    StructureRecord structureRecord = StructureRecord.builder().x(y).y(x).hp(inithp).level(0).game(game).remainingRound(0).structureClass(StructureClass.VILLAGE).build();
                     List<CharacterDTO> characterDTOS = new ArrayList<>(3);
                     for (int t = 0; t < 3; t++) {
                         characterDTOS.add(DTOUtil.toCharacterDTO(randomCharacter()));
@@ -206,13 +206,13 @@ public class GameServiceImpl implements GameService {
 
                     villageCount -= 1;
                 } else if (relicCount > 0) {
-                    StructureRecord structureRecord = StructureRecord.builder().x(x).y(y).hp(inithp).level(0).game(game).remainingRound(0).structureClass(StructureClass.RELIC).build();
+                    StructureRecord structureRecord = StructureRecord.builder().x(y).y(x).hp(inithp).level(0).game(game).remainingRound(0).structureClass(StructureClass.RELIC).build();
                     structureRecordRepository.save(structureRecord);
                     relicCount -= 1;
                 }
             } else {
                 if (relicCount > 0) {
-                    StructureRecord structureRecord = StructureRecord.builder().x(x).y(y).hp(inithp).level(0).game(game).remainingRound(0).structureClass(StructureClass.RELIC).build();
+                    StructureRecord structureRecord = StructureRecord.builder().x(y).y(x).hp(inithp).level(0).game(game).remainingRound(0).structureClass(StructureClass.RELIC).build();
                     structureRecordRepository.save(structureRecord);
                     relicCount -= 1;
                 }
