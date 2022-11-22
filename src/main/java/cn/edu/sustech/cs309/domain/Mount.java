@@ -34,6 +34,10 @@ public class Mount {
 
     private String name;
 
+    @Column(name = "mount_class")
+    @Enumerated(EnumType.STRING)
+    private MountClass mountClass;
+
     @Builder.Default
     private Integer attack = 0;
 

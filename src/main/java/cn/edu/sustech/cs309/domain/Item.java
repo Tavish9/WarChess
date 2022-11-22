@@ -34,13 +34,17 @@ public class Item {
 
     private String name;
 
-    private String description;
+    @Column(name = "item_class")
+    @Enumerated(EnumType.STRING)
+    private ItemClass itemClass;
 
     private Integer hp;
 
     private Integer attack;
 
     private Integer defense;
+
+    private String description;
 
     @JsonIgnore
     @OneToMany(mappedBy = "item", cascade = CascadeType.REMOVE)

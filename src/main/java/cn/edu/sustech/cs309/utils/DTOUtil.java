@@ -101,7 +101,7 @@ public class DTOUtil {
         if (item == null)
             return null;
         Item i = item.getItem();
-        return new ItemDTO(item.getId(), i.getName(), i.getAttack(), i.getDefense(), i.getHp(), i.getDescription());
+        return new ItemDTO(item.getId(), i.getName(), i.getItemClass(), i.getAttack(), i.getDefense(), i.getHp(), i.getDescription());
     }
 
     public static List<ItemDTO> toItemDTOs(List<ItemRecord> itemRecords) {
@@ -116,7 +116,7 @@ public class DTOUtil {
         if (mount == null)
             return null;
         Mount m = mount.getMount();
-        return new MountDTO(mount.getId(), m.getName(), m.getAttack(), m.getDefense(), m.getActionRange(), m.getDescription());
+        return new MountDTO(mount.getId(), m.getName(), m.getMountClass(), m.getAttack(), m.getDefense(), m.getActionRange(), m.getDescription());
     }
 
     public static List<MountDTO> toMountDTOs(List<MountRecord> mountRecords) {
@@ -180,8 +180,9 @@ public class DTOUtil {
 
     public static PlayerDTO toPlayerDTO(Player player) throws JsonProcessingException {
         return new PlayerDTO(player.getId(), player.getStars(), player.getProsperityDegree(), player.getPeaceDegree(),
-                player.getTech(), null, toShopDTO(player.getShopRecords()), toCharacterDTOs(player.getCharacterRecords()), toEquipmentDTOs(player.getEquipmentRecords()),
-                toMountDTOs(player.getMountRecords()), toItemDTOs(player.getItemRecords()), toStructureDTOs(player.getStructureRecords()));
+                player.getTech(), null, toShopDTO(player.getShopRecords()), toCharacterDTOs(player.getCharacterRecords()),
+                toEquipmentDTOs(player.getEquipmentRecords()), toMountDTOs(player.getMountRecords()),
+                toItemDTOs(player.getItemRecords()), toStructureDTOs(player.getStructureRecords()));
     }
 
     public static GameDTO toGameDTO(Game game, ShopDTO shopDTO, int round, boolean currentPlayer) throws JsonProcessingException {

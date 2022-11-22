@@ -484,7 +484,7 @@ public class GameServiceImpl implements GameService {
         if (Integer.parseInt(remainCnt[10]) == 0) {
             tmp++;
         }
-        //1:basic  2:sword  3:shield  4:shield 5:cannon
+        //1:basic  2:sword  3:arrow  4:shield  5:cannon
         int id = r.nextInt(1, tmp + 1);
         Equipment equipment = equipmentRepository.findEquipmentById(id);
         EquipmentRecord equipmentRecord = EquipmentRecord.builder().equipment(equipment).build();
@@ -527,7 +527,7 @@ public class GameServiceImpl implements GameService {
         if (Integer.parseInt(remainCnt[7]) == 0) {
             tmp++;
         }
-        //1:basic  2:fish  3:beer  4:potion
+        //1:basic  2:fish  3:bear  4:potion
         int id = r.nextInt(1, tmp + 1);
         Item item = itemRepository.findItemById(id);
         ItemRecord itemRecord = ItemRecord.builder().item(item).build();
