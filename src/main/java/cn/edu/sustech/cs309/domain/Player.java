@@ -65,7 +65,7 @@ public class Player {
 
     public static final Map<String, int[]> map = new HashMap<>();
 
-    public static final String[] name = {"Life", "Horse", "Fish", "Sword", "Elephant", "Fox", "Bear", "Potion", "Arrow", "Shield", "Cannon"};
+    public static final String[] name = {"Life", "Horse", "Fish", "Sword", "Elephant", "Fox", "Beer", "Potion", "Arrow", "Shield", "Cannon"};
 
     static {
         int[] round = {1, 2, 2, 2, 3, 3, 3, 3, 3, 3, 5};
