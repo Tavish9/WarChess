@@ -202,7 +202,7 @@ public class StructureServiceImpl implements StructureService {
 
         Player player = structureRecord.getPlayer();
         if (player == null)
-            throw new RuntimeException("structure does not exist");
+            throw new RuntimeException("player does not exist");
         int costMoney = structureRecord.getLevel() * 10;
         if (player.getStars() < costMoney)
             throw new RuntimeException("player does not have enough money");
@@ -222,6 +222,31 @@ public class StructureServiceImpl implements StructureService {
         player.setStars(player.getStars() - costMoney);
         playerRepository.save(player);
         structureRecord.setLevel(structureRecord.getLevel() + 1);
+        structureRecordRepository.save(structureRecord);
+        return DTOUtil.toStructureDTO(structureRecord);
+    }
+
+    @Override
+    public StructureDTO healStructure(Integer structureId) throws JsonProcessingException {
+        StructureRecord structureRecord = structureRecordRepository.findStructureRecordById(structureId);
+        if (structureRecord == null)
+            throw new RuntimeException("structure does not exist");
+
+        if (structureRecord.getStructureClass() == StructureClass.RELIC)
+            throw new RuntimeException("Relic can not be heal");
+
+        Player player = structureRecord.getPlayer();
+        if (player == null)
+            throw new RuntimeException("player does not exist");
+
+        int costMoney = 50-structureRecord.getHp() ;
+        if (player.getStars() < costMoney)
+            throw new RuntimeException("player does not have enough money");
+
+
+        player.setStars(player.getStars() - costMoney);
+        structureRecord.setHp(50);
+        playerRepository.save(player);
         structureRecordRepository.save(structureRecord);
         return DTOUtil.toStructureDTO(structureRecord);
     }

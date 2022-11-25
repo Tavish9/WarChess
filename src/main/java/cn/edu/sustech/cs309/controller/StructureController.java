@@ -71,4 +71,9 @@ public class StructureController {
         return ResponseResult.success(structureService.updateStructure(structureId, v));
     }
 
+    @ApiOperation(value = "建筑回血")
+    @PutMapping("structure/{structureid}/heal")
+    public ResponseResult<?> healStructure(@PathVariable("structureid") Integer structureId) throws JsonProcessingException{
+        return ResponseResult.success(structureService.healStructure(structureId));
+    }
 }

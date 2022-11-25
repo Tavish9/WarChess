@@ -19,4 +19,6 @@ public interface StructureService {
     StructureDTO updateTechnologies(Integer structureId,Integer characterId,Integer v) throws JsonProcessingException;
 
     StructureDTO updateStructure(Integer structureId,Integer v) throws JsonProcessingException;
+
+    StructureDTO healStructure(Integer structureId) throws  JsonProcessingException;
 }
