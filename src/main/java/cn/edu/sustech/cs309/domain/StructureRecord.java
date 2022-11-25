@@ -43,7 +43,7 @@ public class StructureRecord {
     @JoinColumn(name = "player_id")
     private Player player;
 
-    @Column(name = "structure_class", nullable = false)
+    @Column(name = "structure_class")
     @Enumerated(EnumType.STRING)
     private StructureClass structureClass;
 
@@ -51,7 +51,7 @@ public class StructureRecord {
     private Integer level = 0;
 
     @Builder.Default
-    private Integer hp = 30;
+    private Integer hp = 50;
 
     @Builder.Default
     @Column(name="remaining_round")

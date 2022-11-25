@@ -130,6 +130,16 @@ public class GameServiceImpl implements GameService {
     public GameDTO ini(String username1, String username2) throws JsonProcessingException {
 //        Map map1 = Map.builder().data("[[0,0,0,3,3,2,0,3,2,3,2,2,2,0,2,0,0],[2,0,0,0,2,0,0,3,1,0,3,2,0,0,0,0,2],[3,2,2,0,0,2,2,0,0,0,0,0,0,0,0,2,0],[3,0,0,0,2,2,2,0,0,0,3,3,1,0,1,2,2],[3,3,0,0,0,0,2,3,0,0,0,3,3,0,0,0,0],[2,2,2,3,3,0,3,3,3,0,3,3,0,0,0,0,2],[2,0,0,3,1,3,2,2,2,0,0,0,0,0,0,0,0],[2,0,0,0,0,0,2,0,0,0,3,3,0,0,2,2,2],[0,2,0,0,0,0,2,1,0,0,1,2,2,2,2,0,0],[0,0,0,0,0,0,0,0,0,2,2,2,2,3,0,0,2],[0,0,0,0,2,0,0,0,2,2,2,2,0,0,3,0,0],[3,0,2,2,1,0,0,0,2,0,3,2,0,0,0,0,2],[3,0,0,3,1,0,3,3,2,0,0,3,2,3,0,3,0],[0,0,1,0,0,0,0,3,2,0,0,2,3,3,0,0,2],[0,0,0,0,0,3,3,0,2,2,2,2,1,3,0,0,0],[0,0,0,0,2,3,0,0,0,2,1,1,0,0,0,0,2],[0,0,0,0,2,2,0,2,0,0,2,0,0,0,0,0,0]]").build();
 //        mapRepository.save(map1);
+//        for (int i = 0; i < 4; i++) {
+//            Item item1 = Item.builder().build();
+//            itemRepository.save(item1);
+//            Mount mount = Mount.builder().build();
+//            mountRepository.save(mount);
+//            Equipment equipment = Equipment.builder().build();
+//            equipmentRepository.save(equipment);
+//        }
+//        Equipment equipment = Equipment.builder().build();
+//        equipmentRepository.save(equipment);
         Account account2 = null;
         if (StringUtils.hasText(username2)) {
             account2 = accountRepository.findAccountByUsername(username2);
@@ -152,6 +162,7 @@ public class GameServiceImpl implements GameService {
         player1 = game.getPlayers().get(0);
         player2 = game.getPlayers().get(1);
 
+
         CharacterRecord character1 = randomCharacter();
         if (!random.nextBoolean()) {
             character1.setX(0);
@@ -162,6 +173,10 @@ public class GameServiceImpl implements GameService {
         }
         character1.setPlayer(player1);
         characterRecordRepository.save(character1);
+        StructureRecord structureRecord1 = StructureRecord.builder()
+                .x(character1.getX()).y(character1.getY()).game(game).player(player1).build();
+        structureRecordRepository.save(structureRecord1);
+        player1.getStructureRecords().add(structureRecord1);
         player1.getCharacterRecords().add(character1);
 
         CharacterRecord character2 = randomCharacter();
@@ -174,6 +189,10 @@ public class GameServiceImpl implements GameService {
         }
         character2.setPlayer(player2);
         characterRecordRepository.save(character2);
+        StructureRecord structureRecord2 = StructureRecord.builder()
+                .x(character2.getX()).y(character2.getY()).game(game).player(player2).build();
+        structureRecordRepository.save(structureRecord2);
+        player2.getStructureRecords().add(structureRecord2);
         player2.getCharacterRecords().add(character2);
 
         ArrayList<Pair<Integer, Integer>> position = new ArrayList<>();
@@ -190,7 +209,7 @@ public class GameServiceImpl implements GameService {
                 }
             }
         }
-        int villageCount = 20, relicCount = 4, inithp = 10;
+        int villageCount = 20, relicCount = 4, hp = 30;
         Collections.shuffle(position);
         // 0空地 1山 2水 3树
         // village 可以在0   relic可以在0 1 2 3
@@ -205,7 +224,9 @@ public class GameServiceImpl implements GameService {
                         }
                     }
                     if (!flag)continue;
-                    StructureRecord structureRecord = StructureRecord.builder().x(y).y(x).hp(inithp).level(0).game(game).remainingRound(0).structureClass(StructureClass.VILLAGE).build();
+                    StructureRecord structureRecord = StructureRecord.builder()
+                            .x(y).y(x).hp(hp + random.nextInt(-10, 10))
+                            .game(game).structureClass(StructureClass.VILLAGE).build();
                     List<CharacterDTO> characterDTOS = new ArrayList<>(3);
                     for (int t = 0; t < 3; t++) {
                         characterDTOS.add(DTOUtil.toCharacterDTO(randomCharacter()));
@@ -223,7 +244,8 @@ public class GameServiceImpl implements GameService {
                     }
                     if (!flag)continue;
                     if (x+y>5&&x+y<28)continue;
-                    StructureRecord structureRecord = StructureRecord.builder().x(y).y(x).hp(inithp).level(0).game(game).remainingRound(0).structureClass(StructureClass.RELIC).build();
+                    StructureRecord structureRecord = StructureRecord.builder()
+                            .x(y).y(x).game(game).structureClass(StructureClass.RELIC).build();
                     structureRecordRepository.save(structureRecord);
                     relicCount -= 1;
                     mark[x][y]=2;
@@ -238,7 +260,9 @@ public class GameServiceImpl implements GameService {
                     }
                     if (!flag)continue;
                     if (x+y>5&&x+y<28)continue;
-                    StructureRecord structureRecord = StructureRecord.builder().x(y).y(x).hp(inithp).level(0).game(game).remainingRound(0).structureClass(StructureClass.RELIC).build();
+                    StructureRecord structureRecord = StructureRecord.builder()
+                            .x(y).y(x).hp(hp + random.nextInt(-10, 10))
+                            .game(game).structureClass(StructureClass.RELIC).build();
                     structureRecordRepository.save(structureRecord);
                     relicCount -= 1;
                     mark[x][y]=2;
@@ -253,7 +277,10 @@ public class GameServiceImpl implements GameService {
                 int x = integerIntegerPair.getLeft(), y = integerIntegerPair.getRight();
                 if (mark[x][y]==0||mark[x][y]==2)continue;
                 if (mapInt[x][y] == 0) {
-                    if (villageCount > 0) {StructureRecord structureRecord = StructureRecord.builder().x(y).y(x).hp(inithp).level(0).game(game).remainingRound(0).structureClass(StructureClass.VILLAGE).build();
+                    if (villageCount > 0) {
+                        StructureRecord structureRecord = StructureRecord.builder()
+                                .x(y).y(x).hp(hp + random.nextInt(-10, 10))
+                                .game(game).structureClass(StructureClass.VILLAGE).build();
                         List<CharacterDTO> characterDTOS = new ArrayList<>(3);
                         for (int t = 0; t < 3; t++) {
                             characterDTOS.add(DTOUtil.toCharacterDTO(randomCharacter()));
@@ -262,13 +289,16 @@ public class GameServiceImpl implements GameService {
                         structureRecordRepository.save(structureRecord);
                         villageCount -= 1;
                     } else if (relicCount > 0) {
-                        StructureRecord structureRecord = StructureRecord.builder().x(y).y(x).hp(inithp).level(0).game(game).remainingRound(0).structureClass(StructureClass.RELIC).build();
+                        StructureRecord structureRecord = StructureRecord.builder()
+                                .x(y).y(x).game(game).structureClass(StructureClass.RELIC).build();
                         structureRecordRepository.save(structureRecord);
                         relicCount -= 1;
                     }
                 } else {
                     if (relicCount > 0) {
-                        StructureRecord structureRecord = StructureRecord.builder().x(y).y(x).hp(inithp).level(0).game(game).remainingRound(0).structureClass(StructureClass.RELIC).build();
+                        StructureRecord structureRecord = StructureRecord.builder()
+                                .x(y).y(x).hp(hp + random.nextInt(-10, 10))
+                                .game(game).structureClass(StructureClass.RELIC).build();
                         structureRecordRepository.save(structureRecord);
                         relicCount -= 1;
                     }
@@ -527,7 +557,7 @@ public class GameServiceImpl implements GameService {
         if (Integer.parseInt(remainCnt[7]) == 0) {
             tmp++;
         }
-        //1:basic  2:fish  3:bear  4:potion
+        //1:basic  2:fish  3:beer  4:potion
         int id = r.nextInt(1, tmp + 1);
         Item item = itemRepository.findItemById(id);
         ItemRecord itemRecord = ItemRecord.builder().item(item).build();
