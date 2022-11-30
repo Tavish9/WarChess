@@ -33,12 +33,6 @@ public class Game {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updateTime;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
-    @ToString.Exclude
-    @Builder.Default
-    private List<Player> players = new ArrayList<>();
-
     //false means player1 first,otherwise player2 first
     private Boolean playerFirst;
 

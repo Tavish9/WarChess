@@ -2,10 +2,7 @@ package cn.edu.sustech.cs309.utils;
 
 import cn.edu.sustech.cs309.domain.*;
 import cn.edu.sustech.cs309.dto.*;
-import cn.edu.sustech.cs309.repository.EquipmentRecordRepository;
-import cn.edu.sustech.cs309.repository.ItemRecordRepository;
-import cn.edu.sustech.cs309.repository.MountRecordRepository;
-import cn.edu.sustech.cs309.repository.StructureRecordRepository;
+import cn.edu.sustech.cs309.repository.*;
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,6 +17,9 @@ import java.util.List;
 public class DTOUtil {
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private PlayerRepository playerRepository;
 
     @Autowired
     private EquipmentRecordRepository equipmentRecordRepository;
@@ -43,6 +43,7 @@ public class DTOUtil {
         dtoUtil.itemRecordRepository = this.itemRecordRepository;
         dtoUtil.mountRecordRepository = this.mountRecordRepository;
         dtoUtil.structureRecordRepository = this.structureRecordRepository;
+        dtoUtil.playerRepository = this.playerRepository;
     }
 
 
@@ -51,7 +52,8 @@ public class DTOUtil {
     }
 
     public static ArchiveDTO toArchiveDTO(Archive archive) throws JsonProcessingException {
-        return new ArchiveDTO(archive.getId(), archive.getGame().getId(), toPlayerDTO(archive.getGame().getPlayers().get(0)));
+        List<Player> players = dtoUtil.playerRepository.findPlayersByGameOrderById(archive.getGame());
+        return new ArchiveDTO(archive.getId(), archive.getGame().getId(), toPlayerDTO(players.get(0)));
     }
 
     public static List<ArchiveDTO> toArchiveDTOs(List<Archive> archives) throws JsonProcessingException {
@@ -187,7 +189,8 @@ public class DTOUtil {
 
     public static GameDTO toGameDTO(Game game, ShopDTO shopDTO, int round, boolean currentPlayer) throws JsonProcessingException {
         List<StructureRecord> neutralStructure = dtoUtil.structureRecordRepository.findStructureRecordsByGameAndPlayer(game, null);
-        return new GameDTO(game.getId(), toPlayerDTO(game.getPlayers().get(0)), toPlayerDTO(game.getPlayers().get(1)), shopDTO, round,
+        List<Player> players = dtoUtil.playerRepository.findPlayersByGameOrderById(game);
+        return new GameDTO(game.getId(), toPlayerDTO(players.get(0)), toPlayerDTO(players.get(1)), shopDTO, round,
                 currentPlayer, DTOUtil.toStructureDTOs(neutralStructure), JSON.parseObject(game.getMap().getData(), int[][].class));
     }
 }

@@ -45,11 +45,11 @@ public class Player {
 
     @Builder.Default
     @Column(name = "prosperity_degree")
-    private Integer prosperityDegree = 0;
+    private Integer prosperityDegree = 3;
 
     @Builder.Default
     @Column(name = "peace_degree")
-    private Integer peaceDegree = 0;
+    private Integer peaceDegree = 2;
 
     @Builder.Default
     @Column(name = "techtree_feasible")

@@ -91,8 +91,9 @@ public class GameServiceImpl implements GameService {
         Game oldGame = last.getGame();
         Game newGame = Game.builder().playerFirst(oldGame.getPlayerFirst()).map(oldGame.getMap()).build();
         gameRepository.save(newGame);
-        Player oldPlayer1 = oldGame.getPlayers().get(0);
-        Player oldPlayer2 = oldGame.getPlayers().get(1);
+        List<Player> players = playerRepository.findPlayersByGameOrderById(oldGame);
+        Player oldPlayer1 = players.get(0);
+        Player oldPlayer2 = players.get(1);
         Player newPlayer1 = Player.builder()
                 .account(oldPlayer1.getAccount())
                 .stars(oldPlayer1.getStars())
@@ -114,9 +115,6 @@ public class GameServiceImpl implements GameService {
                 .vision(oldPlayer2.getVision()).build();
         playerRepository.save(newPlayer1);
         playerRepository.save(newPlayer2);
-        newGame.getPlayers().add(newPlayer1);
-        newGame.getPlayers().add(newPlayer2);
-        gameRepository.save(newGame);
         // TODO: copy data
         boolean currentPlayer;
         if (game.getPlayerFirst())
@@ -156,12 +154,8 @@ public class GameServiceImpl implements GameService {
         gameRepository.save(game);
         Player player1 = Player.builder().account(account1).game(game).build();
         Player player2 = Player.builder().account(Objects.requireNonNullElse(account2, account1)).game(game).build();
-        game.getPlayers().add(player1);
-        game.getPlayers().add(player2);
-        gameRepository.save(game);
-        player1 = game.getPlayers().get(0);
-        player2 = game.getPlayers().get(1);
-
+        playerRepository.save(player1);
+        playerRepository.save(player2);
 
         CharacterRecord character1 = randomCharacter();
         if (!random.nextBoolean()) {
@@ -198,10 +192,10 @@ public class GameServiceImpl implements GameService {
         ArrayList<Pair<Integer, Integer>> position = new ArrayList<>();
 
         int[][] mapInt = JSON.parseObject(map.getData(), int[][].class);
-        int[][] mark=new int[17][17];
+        int[][] mark = new int[17][17];
         for (int i = 0; i < mapInt.length; i++) {
             for (int j = 0; j < mapInt[i].length; j++) {
-                mark[i][j]=1;
+                mark[i][j] = 1;
                 if (mapInt[i][j] != 2) {
                     if (i == 0 && j == 16) continue;
                     if (i == 16 && j == 0) continue;
@@ -217,13 +211,15 @@ public class GameServiceImpl implements GameService {
             int x = integerIntegerPair.getLeft(), y = integerIntegerPair.getRight();
             if (mapInt[x][y] == 0) {
                 if (villageCount > 0) {
-                    boolean flag=true;
-                    for (int i=-2;i<3&&flag;i++)if (0<=x+i&&x+i<17){
-                        for (int j=-2;j<3&&flag;j++)if (0<=y+j&&y+j<17){
-                            if (mark[x+i][y+j]==0)flag=false;
+                    boolean flag = true;
+                    for (int i = -2; i < 3 && flag; i++)
+                        if (0 <= x + i && x + i < 17) {
+                            for (int j = -2; j < 3 && flag; j++)
+                                if (0 <= y + j && y + j < 17) {
+                                    if (mark[x + i][y + j] == 0) flag = false;
+                                }
                         }
-                    }
-                    if (!flag)continue;
+                    if (!flag) continue;
                     StructureRecord structureRecord = StructureRecord.builder()
                             .x(y).y(x).hp(hp + random.nextInt(-10, 10))
                             .game(game).structureClass(StructureClass.VILLAGE).build();
@@ -234,48 +230,52 @@ public class GameServiceImpl implements GameService {
                     structureRecord.setCharacter(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(characterDTOS));
                     structureRecordRepository.save(structureRecord);
                     villageCount -= 1;
-                    mark[x][y]=0;
+                    mark[x][y] = 0;
                 } else if (relicCount > 0) {
-                    boolean flag=true;
-                    for (int i=-6;i<6&&flag;i++)if (0<=x+i&&x+i<17){
-                        for (int j=-6;j<6&&flag;j++)if (0<=y+j&&y+j<17){
-                            if (mark[x+i][y+j]==2)flag=false;
+                    boolean flag = true;
+                    for (int i = -6; i < 6 && flag; i++)
+                        if (0 <= x + i && x + i < 17) {
+                            for (int j = -6; j < 6 && flag; j++)
+                                if (0 <= y + j && y + j < 17) {
+                                    if (mark[x + i][y + j] == 2) flag = false;
+                                }
                         }
-                    }
-                    if (!flag)continue;
-                    if (x+y>5&&x+y<28)continue;
+                    if (!flag) continue;
+                    if (x + y > 5 && x + y < 28) continue;
                     StructureRecord structureRecord = StructureRecord.builder()
                             .x(y).y(x).game(game).structureClass(StructureClass.RELIC).build();
                     structureRecordRepository.save(structureRecord);
                     relicCount -= 1;
-                    mark[x][y]=2;
+                    mark[x][y] = 2;
                 }
             } else {
                 if (relicCount > 0) {
-                    boolean flag=true;
-                    for (int i=-6;i<6&&flag;i++)if (0<=x+i&&x+i<17){
-                        for (int j=-6;j<6&&flag;j++)if (0<=y+j&&y+j<17){
-                            if (mark[x+i][y+j]==2)flag=false;
+                    boolean flag = true;
+                    for (int i = -6; i < 6 && flag; i++)
+                        if (0 <= x + i && x + i < 17) {
+                            for (int j = -6; j < 6 && flag; j++)
+                                if (0 <= y + j && y + j < 17) {
+                                    if (mark[x + i][y + j] == 2) flag = false;
+                                }
                         }
-                    }
-                    if (!flag)continue;
-                    if (x+y>5&&x+y<28)continue;
+                    if (!flag) continue;
+                    if (x + y > 5 && x + y < 28) continue;
                     StructureRecord structureRecord = StructureRecord.builder()
                             .x(y).y(x).hp(hp + random.nextInt(-10, 10))
                             .game(game).structureClass(StructureClass.RELIC).build();
                     structureRecordRepository.save(structureRecord);
                     relicCount -= 1;
-                    mark[x][y]=2;
+                    mark[x][y] = 2;
                 }
             }
         }
 
 
-        if (villageCount>0||relicCount>0){
+        if (villageCount > 0 || relicCount > 0) {
 
             for (Pair<Integer, Integer> integerIntegerPair : position) {
                 int x = integerIntegerPair.getLeft(), y = integerIntegerPair.getRight();
-                if (mark[x][y]==0||mark[x][y]==2)continue;
+                if (mark[x][y] == 0 || mark[x][y] == 2) continue;
                 if (mapInt[x][y] == 0) {
                     if (villageCount > 0) {
                         StructureRecord structureRecord = StructureRecord.builder()
@@ -320,7 +320,6 @@ public class GameServiceImpl implements GameService {
 
         /*every round get some star*/
         player1.setStars(player1.getStars() + 3);
-
         List<StructureRecord> player1Structures = structureRecordRepository.findStructureRecordsByPlayer(player1);
         List<CharacterRecord> characterRecords = characterRecordRepository.findCharacterRecordsByPlayer(player1);
         for (CharacterRecord c : characterRecords) {
@@ -437,17 +436,18 @@ public class GameServiceImpl implements GameService {
 
         boolean currentPlayer;
         Player player2;
+        List<Player> players = playerRepository.findPlayersByGameOrderById(game);
         GameRecord gameRecord = GameRecord.builder().game(game).round(round).build();
-        if (player1.getId().equals(game.getPlayers().get(0).getId())) {
+        if (player1.getId().equals(players.get(0).getId())) {
             currentPlayer = true;
-            player2 = game.getPlayers().get(1);
+            player2 = players.get(1);
             player2.setProsperityDegree(prosperityDegree(player2));
             player2.setProsperityDegree(prosperityDegree(player2));
             gameRecord.setPlayer1(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(player1));
             gameRecord.setPlayer2(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(player2));
         } else {
             currentPlayer = false;
-            player2 = game.getPlayers().get(0);
+            player2 = players.get(0);
             player2.setProsperityDegree(prosperityDegree(player2));
             player2.setProsperityDegree(prosperityDegree(player2));
             gameRecord.setPlayer1(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(player2));
