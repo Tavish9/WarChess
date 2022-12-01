@@ -94,6 +94,7 @@ public class StructureServiceImpl implements StructureService {
         characterRecord.updateAttribute(type);
         characterRecord.setX(x);
         characterRecord.setY(y);
+        characterRecord.setPlayer(player);
         log.debug(playerId + "buy a character");
         characterRecordRepository.save(characterRecord);
         return DTOUtil.toStructureDTO(structureRecord);

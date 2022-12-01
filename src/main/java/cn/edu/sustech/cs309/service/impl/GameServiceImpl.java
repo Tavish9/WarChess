@@ -203,7 +203,7 @@ public class GameServiceImpl implements GameService {
                 }
             }
         }
-        int villageCount = 20, relicCount = 4, hp = 30;
+        int villageCount = 20, relicCount = 4, hp = 15;
         Collections.shuffle(position);
         // 0空地 1山 2水 3树
         // village 可以在0   relic可以在0 1 2 3
