@@ -87,8 +87,23 @@ public class CharacterServiceImpl implements CharacterService {
             throw new RuntimeException("character can't attack in this round");
         characterRecord_attack.setActionState(2);
         characterRecordRepository.save(characterRecord_attack);
-        if (characterRecord_attack.getAttack() > characterRecord_attacked.getDefense()) {
-            int newHp = characterRecord_attacked.getHp() - characterRecord_attack.getAttack() + characterRecord_attacked.getDefense();
+        Integer attack=characterRecord_attack.getAttack();
+        if (characterRecord_attack.getEquipmentRecord()!=null) {
+            attack += characterRecord_attack.getEquipmentRecord().getEquipment().getAttack();
+        }
+        if (characterRecord_attacked.getMountRecord()!=null){
+            attack += characterRecord_attack.getMountRecord().getMount().getAttack();
+        }
+        Integer defense=characterRecord_attacked.getDefense();
+        if (characterRecord_attacked.getEquipmentRecord()!=null){
+            defense+=characterRecord_attacked.getEquipmentRecord().getEquipment().getDefense();
+        }
+        if (characterRecord_attacked.getMountRecord()!=null){
+            defense+=characterRecord_attacked.getMountRecord().getMount().getDefense();
+        }
+        Integer damage=attack-defense;
+        if ( damage>0 ) {
+            int newHp = characterRecord_attacked.getHp() - damage;
             characterRecord_attacked.setHp(Math.max(0, newHp));
             characterRecordRepository.save(characterRecord_attacked);
             if (newHp <= 0) {
@@ -134,6 +149,12 @@ public class CharacterServiceImpl implements CharacterService {
         characterRecordRepository.save(character);
 
         int newHp = structure.getHp() - character.getAttack();
+        if (character.getMountRecord()!=null){
+            newHp-=character.getMountRecord().getMount().getAttack();
+        }
+        if (character.getEquipmentRecord()!=null){
+            newHp-=character.getEquipmentRecord().getEquipment().getAttack();
+        }
         if (newHp > 0)
             structure.setHp(newHp);
         else {
