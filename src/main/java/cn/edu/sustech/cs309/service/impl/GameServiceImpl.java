@@ -158,6 +158,8 @@ public class GameServiceImpl implements GameService {
         playerRepository.save(player2);
 
         CharacterRecord character1 = randomCharacter();
+        int type = (character1.getAttack() + character1.getDefense() + character1.getHp()) % 3;
+        character1.updateAttribute(type);
         if (!random.nextBoolean()) {
             character1.setX(0);
             character1.setY(16);
@@ -174,6 +176,8 @@ public class GameServiceImpl implements GameService {
         player1.getCharacterRecords().add(character1);
 
         CharacterRecord character2 = randomCharacter();
+        type = (character2.getAttack() + character2.getDefense() + character2.getHp()) % 3;
+        character2.updateAttribute(type);
         if (character1.getX() == 0) {
             character2.setX(16);
             character2.setY(0);
@@ -306,6 +310,14 @@ public class GameServiceImpl implements GameService {
             }
 
         }
+
+        GameRecord gameRecord = GameRecord.builder().game(game).build();
+        gameRecord.setPlayer1(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(player1));
+        gameRecord.setPlayer2(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(player2));
+        List<StructureRecord> neutralStructure = structureRecordRepository.findStructureRecordsByGameAndPlayer(game, null);
+        gameRecord.setStructure(Objects.requireNonNullElse(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(neutralStructure), null));
+        gameRecordRepository.save(gameRecord);
+
         return DTOUtil.toGameDTO(game, null, 1, game.getPlayerFirst());
     }
 
@@ -382,12 +394,9 @@ public class GameServiceImpl implements GameService {
 
         Game game = player1.getGame();
         GameRecord last = gameRecordRepository.findFirstByGameOrderByIdDesc(game);
-        int round;
-        if (last == null) {
-            round = 1;
-        } else {
-            round = last.getRound() + 1;
-        }
+        if (last == null)
+            throw new RuntimeException("Restart your game!");
+        int round = last.getRound() + 1;
 
         int marketCnt = structureRecordRepository.countByPlayerAndStructureClass(player1.getId(), StructureClass.MARKET.name());
         List<EquipmentRecord> e = new ArrayList<>(2 * marketCnt);
@@ -454,6 +463,9 @@ public class GameServiceImpl implements GameService {
             gameRecord.setPlayer2(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(player1));
         }
         playerRepository.save(player2);
+
+        List<StructureRecord> neutralStructure = structureRecordRepository.findStructureRecordsByGameAndPlayer(game, null);
+        gameRecord.setStructure(Objects.requireNonNullElse(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(neutralStructure), null));
         gameRecordRepository.save(gameRecord);
 
         // update current shop info
@@ -466,6 +478,78 @@ public class GameServiceImpl implements GameService {
         if (shopRecords2 != null)
             player2.getShopRecords().addAll(shopRecords2);
         return DTOUtil.toGameDTO(game, shopDTO, round, currentPlayer);
+    }
+
+    @Override
+    public GameDTO stepBack(Integer playerId, boolean current) throws JsonProcessingException {
+        Player player = playerRepository.findPlayerById(playerId);
+        if (player == null) {
+            throw new RuntimeException("Player does not exist");
+        }
+        Game game = player.getGame();
+        GameRecord last = gameRecordRepository.findFirstByGameOrderByIdDesc(game);
+        if (last == null)
+            throw new RuntimeException("Restart your game");
+
+        if (!current) {
+            last = gameRecordRepository.findGameRecordByGameAndRound(game, last.getRound() - 2);
+            if (last == null)
+                throw new RuntimeException("Unable to step back more");
+            gameRecordRepository.deleteById(gameRecordRepository.findGameRecordByGameAndRound(game, last.getRound() + 1).getId());
+            gameRecordRepository.deleteById(gameRecordRepository.findGameRecordByGameAndRound(game, last.getRound() + 2).getId());
+        }
+
+        Player player1 = objectMapper.readValue(last.getPlayer1(), Player.class);
+        Player player2 = objectMapper.readValue(last.getPlayer2(), Player.class);
+
+        for (Player p : List.of(player1, player2)) {
+            List<CharacterRecord> characterRecords = characterRecordRepository.findCharacterRecordsByPlayer(p);
+            List<CharacterRecord> extraCharacters = characterRecords.stream()
+                    .filter(c -> !p.getCharacterRecords().stream().map(CharacterRecord::getId).toList().contains(c.getId()))
+                    .toList();
+            extraCharacters.forEach(c -> c.setPlayer(null));
+
+            List<EquipmentRecord> equipmentRecords = equipmentRecordRepository.findEquipmentRecordsByPlayer(p);
+            List<EquipmentRecord> extraEquipments = equipmentRecords.stream()
+                    .filter(e -> !p.getEquipmentRecords().stream().map(EquipmentRecord::getId).toList().contains(e.getId())).toList();
+            extraEquipments.forEach(e -> e.setPlayer(null));
+
+            List<ItemRecord> itemRecords = itemRecordRepository.findItemRecordsByPlayer(p);
+            List<ItemRecord> extraItems = itemRecords.stream()
+                    .filter(i -> !p.getItemRecords().stream().map(ItemRecord::getId).toList().contains(i.getId())).toList();
+            extraItems.forEach(i -> i.setPlayer(null));
+
+            List<MountRecord> mountRecords = mountRecordRepository.findMountRecordsByPlayer(p);
+            List<MountRecord> extraMounts = mountRecords.stream()
+                    .filter(m -> !p.getMountRecords().stream().map(MountRecord::getId).toList().contains(m.getId())).toList();
+            extraMounts.forEach(m -> m.setPlayer(null));
+        }
+        playerRepository.save(player1);
+        playerRepository.save(player2);
+
+        if (!current) {
+            List<ShopRecord> shopRecords = new ArrayList<>();
+            for (Player p : List.of(player1, player2)) {
+                shopRecords.addAll(Objects.requireNonNullElse(shopRecordRepository.findShopRecordsByPlayerAndRound(p, last.getRound() + 3), new ArrayList<>()));
+                shopRecords.addAll(Objects.requireNonNullElse(shopRecordRepository.findShopRecordsByPlayerAndRound(p, last.getRound() + 4), new ArrayList<>()));
+            }
+            shopRecordRepository.deleteAll(shopRecords);
+        }
+
+        List<StructureRecord> structureRecords = objectMapper.readValue(last.getStructure(),
+                objectMapper.getTypeFactory().constructParametricType(List.class, StructureRecord.class));
+        if (structureRecords != null)
+            structureRecordRepository.saveAll(structureRecords);
+
+        Player lastPlayer = player1.getId().equals(playerId) ? player2 : player1;
+        List<ShopRecord> shopRecords = shopRecordRepository.findShopRecordsByPlayerAndRound(lastPlayer, last.getRound() + 2);
+        ShopDTO shopDTO = DTOUtil.toShopDTO(shopRecords);
+        boolean currentPlayer;
+        if (game.getPlayerFirst())
+            currentPlayer = last.getRound() % 2 == 0;
+        else
+            currentPlayer = last.getRound() % 2 == 1;
+        return DTOUtil.toGameDTO(game, shopDTO, last.getRound(), currentPlayer);
     }
 
     private int prosperityDegree(Player player) {
@@ -489,11 +573,9 @@ public class GameServiceImpl implements GameService {
         int defense = 3 - tmp1 - tmp2;
         int actionRange = 1;
         int tmp3 = r.nextInt(1000) % 100;
-        int type = (attack + defense + hp) % 3;
         CharacterRecord characterRecord = CharacterRecord.builder()
                 .name(CharacterRecord.characterName[tmp3]).actionRange(actionRange)
                 .hp(hp).attack(attack).defense(defense).build();
-        characterRecord.updateAttribute(type);
         return characterRecordRepository.save(characterRecord);
     }
 

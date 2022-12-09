@@ -38,7 +38,7 @@ public class EquipmentRecord {
     @JoinColumn(name = "equipment_id")
     private Equipment equipment;
 
-    @JsonBackReference
+    @JsonBackReference(value = "player-equipment")
     @ManyToOne
     @JoinColumn(name = "player_id")
     private Player player;

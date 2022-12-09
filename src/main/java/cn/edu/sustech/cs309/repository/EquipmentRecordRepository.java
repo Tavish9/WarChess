@@ -11,5 +11,7 @@ import java.util.List;
 public interface EquipmentRecordRepository extends JpaRepository<EquipmentRecord, Integer> {
     EquipmentRecord findEquipmentRecordById(Integer id);
 
+    List<EquipmentRecord> findEquipmentRecordsByPlayer(Player player);
+
     List<EquipmentRecord> findEquipmentRecordByPlayerAndUsed(Player player, Boolean used);
 }

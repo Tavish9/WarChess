@@ -11,5 +11,7 @@ import java.util.List;
 public interface MountRecordRepository extends JpaRepository<MountRecord, Integer> {
     MountRecord findMountRecordById(Integer id);
 
+    List<MountRecord> findMountRecordsByPlayer(Player player);
+
     List<MountRecord> findMountRecordByPlayerAndUsed(Player player, Boolean used);
 }

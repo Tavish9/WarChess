@@ -75,37 +75,37 @@ public class Player {
         }
     }
 
-    @JsonManagedReference
+    @JsonManagedReference(value = "player-character")
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
     @ToString.Exclude
     @Builder.Default
     private List<CharacterRecord> characterRecords = new ArrayList<>();
 
-    @JsonManagedReference
+    @JsonManagedReference(value = "player-equipment")
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
     @ToString.Exclude
     @Builder.Default
     private List<EquipmentRecord> equipmentRecords = new ArrayList<>();
 
-    @JsonManagedReference
+    @JsonManagedReference(value = "player-item")
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
     @ToString.Exclude
     @Builder.Default
     private List<ItemRecord> itemRecords = new ArrayList<>();
 
-    @JsonManagedReference
+    @JsonManagedReference(value = "player-structure")
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
     @ToString.Exclude
     @Builder.Default
     private List<StructureRecord> structureRecords = new ArrayList<>();
 
-    @JsonManagedReference
+    @JsonManagedReference(value = "player-mount")
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
     @ToString.Exclude
     @Builder.Default
     private List<MountRecord> mountRecords = new ArrayList<>();
 
-    @JsonIgnore
+    @JsonManagedReference(value = "player-shop")
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
     @ToString.Exclude
     @Builder.Default

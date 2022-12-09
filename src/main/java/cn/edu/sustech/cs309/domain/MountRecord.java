@@ -38,7 +38,7 @@ public class MountRecord {
     @JoinColumn(name = "mount_id")
     private Mount mount;
 
-    @JsonBackReference
+    @JsonBackReference(value = "player-mount")
     @ManyToOne
     @JoinColumn(name = "player_id")
     private Player player;

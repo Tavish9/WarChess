@@ -47,4 +47,11 @@ public class GameController {
             throw new RuntimeException("Invalid player");
         return ResponseResult.success(gameService.update(playerId));
     }
+
+    @ApiOperation(value = "回退")
+    @DeleteMapping("/game/back")
+    public ResponseResult<?> stepBack(@RequestParam(value = "playerid") Integer playerId,
+                                      @RequestParam(value = "current") boolean current) throws JsonProcessingException {
+        return ResponseResult.success(gameService.stepBack(playerId, current));
+    }
 }

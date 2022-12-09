@@ -11,5 +11,7 @@ import java.util.List;
 public interface ItemRecordRepository extends JpaRepository<ItemRecord, Integer> {
     ItemRecord findItemRecordById(Integer id);
 
+    List<ItemRecord> findItemRecordsByPlayer(Player player);
+
     List<ItemRecord> findItemRecordByPlayerAndUsed(Player player, Boolean used);
 }

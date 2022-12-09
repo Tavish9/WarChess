@@ -36,7 +36,8 @@ public class GameRecord {
     @JoinColumn(name = "game_id")
     private Game game;
 
-    private Integer round;
+    @Builder.Default
+    private Integer round = 0;
 
     @Lob
     @Type(type = "org.hibernate.type.TextType")
@@ -45,4 +46,8 @@ public class GameRecord {
     @Lob
     @Type(type = "org.hibernate.type.TextType")
     private String player2;
+
+    @Lob
+    @Type(type = "org.hibernate.type.TextType")
+    private String structure;
 }

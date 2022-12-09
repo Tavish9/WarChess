@@ -32,12 +32,12 @@ public class CharacterRecord {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updateTime;
 
-    @JsonBackReference
+    @JsonBackReference(value = "player-character")
     @ManyToOne
     @JoinColumn(name = "player_id")
     private Player player;
 
-    @Column(name = "character_class", nullable = false)
+    @Column(name = "character_class")
     @Enumerated(EnumType.STRING)
     private CharacterClass characterClass;
 

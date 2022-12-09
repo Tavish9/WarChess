@@ -33,12 +33,11 @@ public class StructureRecord {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updateTime;
 
-    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "game_id")
     private Game game;
 
-    @JsonBackReference
+    @JsonBackReference(value = "player-structure")
     @ManyToOne
     @JoinColumn(name = "player_id")
     private Player player;

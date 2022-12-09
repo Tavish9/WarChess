@@ -14,4 +14,6 @@ public interface GameService {
     GameDTO ini(String username1, String username2) throws JsonProcessingException;
 
     GameDTO update(Integer playerId) throws JsonProcessingException;
+
+    GameDTO stepBack(Integer playerId, boolean current) throws JsonProcessingException;
 }

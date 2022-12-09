@@ -49,6 +49,7 @@ public class ShopRecord {
     @Builder.Default
     private Boolean purchased = false;
 
+    @JsonBackReference(value = "player-shop")
     @ManyToOne
     @JoinColumn(name = "player_id")
     private Player player;

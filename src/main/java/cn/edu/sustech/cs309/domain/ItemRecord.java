@@ -36,7 +36,7 @@ public class ItemRecord {
     @JoinColumn(name = "item_id")
     private Item item;
 
-    @JsonBackReference
+    @JsonBackReference(value = "player-item")
     @ManyToOne
     @JoinColumn(name = "player_id")
     private Player player;
