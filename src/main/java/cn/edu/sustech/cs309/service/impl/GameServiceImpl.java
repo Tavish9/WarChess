@@ -148,8 +148,15 @@ public class GameServiceImpl implements GameService {
         if (account1 == null)
             throw new RuntimeException("Account does not exist");
         Random random = new Random();
-        int totalMapSize = mapRepository.countAll();
-        Map map = mapRepository.findMapById(random.nextInt(totalMapSize) + 1);
+//        use old map
+//        int totalMapSize = mapRepository.countAll();
+//        Map map = mapRepository.findMapById(random.nextInt(totalMapSize) + 1);
+        Map map=Map.builder().build();
+        int mapSize=17;
+        String mapData=randomMap(mapSize);
+        map.setData(mapData);
+        mapRepository.save(map);
+
         Game game = Game.builder().playerFirst(random.nextBoolean()).map(map).build();
         gameRepository.save(game);
         Player player1 = Player.builder().account(account1).game(game).build();
@@ -644,5 +651,118 @@ public class GameServiceImpl implements GameService {
         Item item = itemRepository.findItemById(id);
         ItemRecord itemRecord = ItemRecord.builder().item(item).build();
         return itemRecordRepository.save(itemRecord);
+    }
+    public static String randomMap(int mapSize){
+        StringBuilder mapData= new StringBuilder("[");
+        Random r = new Random();
+        int[][] height = new int[mapSize][mapSize];
+        int[][] newMap = new int[mapSize][mapSize];
+        int[][] nextX = new int[mapSize][mapSize];
+        int[][] nextY = new int[mapSize][mapSize];
+        int [][] dir_x={{0,0},{0,0},{-1,-1},{-1,-1},{1,1},{1,1}};
+        int [][] dir_y={{-1,-1},{1,1},{0,0},{-1,1},{0,0},{-1,1}};
+
+//        generate new map
+        for (int i=0;i<mapSize;i++){
+            for (int j=0;j<mapSize;j++){
+                newMap[i][j]=0;
+                height[i][j]=r.nextInt(25)+15*(Math.min(i,mapSize-1-i)+Math.min(j,mapSize-1-j));
+            }
+        }
+        for (int i=0;i<mapSize;i++){
+            nextX[i][0]=nextX[0][i]=nextX[mapSize-1][i]=nextX[i][mapSize-1]=-1;
+        }
+        for (int i=1;i<mapSize-1;i++){
+            for (int j=1;j<mapSize-1;j++){
+                int cnt=0;
+                for (int d=0;d<6;d++) {
+                    if (height[i+dir_x[d][i&1]][j+dir_y[d][i&1]] < height[i][j]) {
+                        cnt += height[i][j]-height[i+dir_x[d][i&1]][j+dir_y[d][i&1]];
+                    }
+                }
+                if (cnt==0){
+                    nextX[i][j]=-1;
+                    continue;
+                }
+                int nextVal=r.nextInt(cnt);
+                for (int d=0;d<6;d++) {
+                    if (height[i+dir_x[d][i&1]][j+dir_y[d][i&1]] < height[i][j]) {
+                        nextVal -= height[i][j]-height[i+dir_x[d][i&1]][j+dir_y[d][i&1]];
+                        if (nextVal<0){
+                            nextX[i][j]=i+dir_x[d][i&1];
+                            nextY[i][j]=j+dir_y[d][i&1];
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+//        generate river
+        for (int t=0;t<mapSize*mapSize/10;t++){
+            int cnt=0,x = 0,y = 0;
+            for (int i=0;i<mapSize;i++){
+                for (int j=0;j<mapSize;j++)if (newMap[i][j]==0){
+                    cnt+=height[i][j];
+                }
+            }
+            if (cnt==0)break;
+            int nextVal=r.nextInt(cnt);
+            for (int i=0;i<mapSize;i++){
+                for (int j=0;j<mapSize;j++)if (newMap[i][j]==0){
+                    nextVal-=height[i][j];
+                    if (nextVal<0){
+                        x=i;
+                        y=j;
+                        break;
+                    }
+                }
+                if (nextVal<0)break;
+            }
+            while(true){
+                t++;
+                newMap[x][y]=2;
+                int next_x=nextX[x][y],next_y=nextY[x][y];
+                if (next_x==-1)break;
+                x=next_x;
+                y=next_y;
+            }
+        }
+        for (int i=3;i<mapSize-3;i++){
+            for (int j=3;j<mapSize-3;j++){
+                if (height[i][j]<=3){
+                    newMap[i][j]=2;
+                }
+            }
+        }
+//        generate mountain
+        for (int i=2;i<mapSize-2;i++){
+            for (int j=2;j<mapSize-2;j++)if (newMap[i][j]!=2){
+                if (height[i][j]>30&&r.nextInt(10)==0){
+                    newMap[i][j]=1;
+                }
+            }
+        }
+//        generate forest
+        for (int i=0;i<mapSize;i++){
+            for (int j=0;j<mapSize;j++)if (newMap[i][j]==0){
+                if (r.nextInt(10)==0){
+                    newMap[i][j]=3;
+                }
+            }
+        }
+        newMap[0][mapSize-1]=0;
+        newMap[mapSize-1][0]=0;
+//      transform data to string
+        for (int i=0;i<mapSize;i++){
+            if (i!=0) mapData.append(',');
+            mapData.append('[');
+            for (int j=0;j<mapSize;j++){
+                if (j!=0) mapData.append(',');
+                mapData.append(newMap[i][j]);
+            }
+            mapData.append(']');
+        }
+        mapData.append(']');
+        return String.valueOf(mapData);
     }
 }
