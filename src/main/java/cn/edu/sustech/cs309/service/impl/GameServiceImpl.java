@@ -1,5 +1,6 @@
 package cn.edu.sustech.cs309.service.impl;
 
+import ch.qos.logback.core.LogbackException;
 import cn.edu.sustech.cs309.domain.Map;
 import cn.edu.sustech.cs309.domain.*;
 import cn.edu.sustech.cs309.dto.ArchiveDTO;
@@ -12,7 +13,10 @@ import cn.edu.sustech.cs309.utils.DTOUtil;
 import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
+import org.hibernate.collection.internal.PersistentList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -698,17 +702,34 @@ public class GameServiceImpl implements GameService {
             }
         }
 //        generate river
-        for (int t=0;t<mapSize*mapSize/10;t++){
+        for (int t=0;t<4;t++){
             int cnt=0,x = 0,y = 0;
-            for (int i=0;i<mapSize;i++){
-                for (int j=0;j<mapSize;j++)if (newMap[i][j]==0){
+            int lx,rx,ly,ry;
+            if (t%2==0) {
+                lx = 2;
+                rx = mapSize / 2;
+            }
+            else {
+                lx=mapSize/2;
+                rx=mapSize-2;
+            }
+            if ((t/2)%2==0) {
+                ly = 2;
+                ry = mapSize / 2;
+            }
+            else {
+                ly=mapSize/2;
+                ry=mapSize-2;
+            }
+            for (int i=lx;i<rx;i++){
+                for (int j=ly;j<ry;j++)if (newMap[i][j]==0){
                     cnt+=height[i][j];
                 }
             }
-            if (cnt==0)break;
+            if (cnt==0)continue;
             int nextVal=r.nextInt(cnt);
-            for (int i=0;i<mapSize;i++){
-                for (int j=0;j<mapSize;j++)if (newMap[i][j]==0){
+            for (int i=lx;i<rx;i++){
+                for (int j=ly;j<ry;j++)if (newMap[i][j]==0){
                     nextVal-=height[i][j];
                     if (nextVal<0){
                         x=i;
@@ -719,7 +740,6 @@ public class GameServiceImpl implements GameService {
                 if (nextVal<0)break;
             }
             while(true){
-                t++;
                 newMap[x][y]=2;
                 int next_x=nextX[x][y],next_y=nextY[x][y];
                 if (next_x==-1)break;
@@ -734,10 +754,79 @@ public class GameServiceImpl implements GameService {
                 }
             }
         }
+
+        //generate pool
+        for (int t=0;t<4;t++){
+            int cnt=0,x = 0,y = 0;
+            int lx,rx,ly,ry;
+            int lim=r.nextInt(4)+3;
+            if (t%2==0) {
+                lx = 2;
+                rx = mapSize / 2;
+            }
+            else {
+                lx=mapSize/2;
+                rx=mapSize-2;
+            }
+            if ((t/2)%2==0) {
+                ly = 2;
+                ry = mapSize / 2;
+            }
+            else {
+                ly=mapSize/2;
+                ry=mapSize-2;
+            }
+            for (int i=lx;i<rx;i++){
+                for (int j=ly;j<ry;j++)if (newMap[i][j]==0){
+                    cnt+=height[i][j];
+                }
+            }
+            if (cnt==0)continue;
+            int nextVal=r.nextInt(cnt);
+            for (int i=lx;i<rx;i++){
+                for (int j=ly;j<ry;j++)if (newMap[i][j]==0){
+                    nextVal-=height[i][j];
+                    if (nextVal<0){
+                        x=i;
+                        y=j;
+                        break;
+                    }
+                }
+                if (nextVal<0)break;
+            }
+            while(true){
+                newMap[x][y]=2;
+                lim-=1;
+                if (lim==0)break;
+                int next_x=nextX[x][y],next_y=nextY[x][y];
+                if (next_x==-1)break;
+                x=next_x;
+                y=next_y;
+            }
+        }
+        for (int i=3;i<mapSize-3;i++){
+            for (int j=3;j<mapSize-3;j++){
+                if (height[i][j]<=3){
+                    newMap[i][j]=2;
+                }
+            }
+        }
 //        generate mountain
+
+        List<Integer> h=new ArrayList<Integer>();
+
+        for (int i=2;i<mapSize-2;i++){
+            for (int j=2;j<mapSize-2;j++){
+                if (newMap[i][j]!=2){
+                    h.add(height[i][j]);
+                }
+            }
+        }
+        h.sort(Integer::compareTo);
+        int lim= h.get(Math.max(0,h.size()-mapSize*10));
         for (int i=2;i<mapSize-2;i++){
             for (int j=2;j<mapSize-2;j++)if (newMap[i][j]!=2){
-                if (height[i][j]>30&&r.nextInt(10)==0){
+                if (height[i][j]>lim && r.nextInt(10)==0){
                     newMap[i][j]=1;
                 }
             }
@@ -745,13 +834,16 @@ public class GameServiceImpl implements GameService {
 //        generate forest
         for (int i=0;i<mapSize;i++){
             for (int j=0;j<mapSize;j++)if (newMap[i][j]==0){
-                if (r.nextInt(10)==0){
+                if (r.nextInt(19)==0){
                     newMap[i][j]=3;
                 }
             }
         }
         newMap[0][mapSize-1]=0;
         newMap[mapSize-1][0]=0;
+        for (int i=1;i<mapSize;i+=2){
+            newMap[i][mapSize-1]=2;
+        }
 //      transform data to string
         for (int i=0;i<mapSize;i++){
             if (i!=0) mapData.append(',');
