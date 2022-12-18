@@ -169,8 +169,7 @@ public class GameServiceImpl implements GameService {
         playerRepository.save(player2);
 
         CharacterRecord character1 = randomCharacter();
-        int type = (character1.getAttack() + character1.getDefense() + character1.getHp()) % 3;
-        character1.updateAttribute(type);
+        character1.updateAttribute(1);
         if (!random.nextBoolean()) {
             character1.setX(0);
             character1.setY(16);
@@ -187,8 +186,7 @@ public class GameServiceImpl implements GameService {
         player1.getCharacterRecords().add(character1);
 
         CharacterRecord character2 = randomCharacter();
-        type = (character2.getAttack() + character2.getDefense() + character2.getHp()) % 3;
-        character2.updateAttribute(type);
+        character2.updateAttribute(1);
         if (character1.getX() == 0) {
             character2.setX(16);
             character2.setY(0);
