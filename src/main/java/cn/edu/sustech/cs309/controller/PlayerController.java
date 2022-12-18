@@ -94,7 +94,7 @@ public class PlayerController {
     @ApiOperation(value = "购买players商店对应的装备")
     @PostMapping(value = "/player/{playerid}/equip")
     public ResponseResult<?> buyEquipments(@PathVariable("playerid") Integer playerId,
-                                           @RequestParam("shopId") Integer shopId) {
+                                           @RequestParam("shopid") Integer shopId) {
         if (playerId <= 0 || shopId <= 0)
             throw new RuntimeException("Invalid input");
         return ResponseResult.success(playerService.buyEquipment(playerId, shopId));
