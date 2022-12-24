@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 
 @Slf4j
@@ -116,6 +117,8 @@ public class StructureServiceImpl implements StructureService {
             throw new RuntimeException("character already act");
         if (v < 0 || v >= 2)
             throw new RuntimeException("v is wrong");
+        if (!Objects.equals(structureRecord.getX(), characterRecord.getX()) || !Objects.equals(structureRecord.getY(), characterRecord.getY()))
+            throw new RuntimeException("character does not at structure");
 
         characterRecord.setActionState(2);
         characterRecordRepository.save(characterRecord);
@@ -140,6 +143,8 @@ public class StructureServiceImpl implements StructureService {
             throw new RuntimeException("character does not exist");
         if (characterRecord.getActionState() == 2)
             throw new RuntimeException("character already act");
+        if (!Objects.equals(structureRecord.getX(), characterRecord.getX()) || !Objects.equals(structureRecord.getY(), characterRecord.getY()))
+            throw new RuntimeException("character does not at structure");
 
         characterRecord.setActionState(2);
         characterRecordRepository.save(characterRecord);
@@ -167,6 +172,8 @@ public class StructureServiceImpl implements StructureService {
             throw new RuntimeException("character should be scholar to updateTechnologies");
         if (v < 0 || v > 10)
             throw new RuntimeException("Index is not valid");
+        if (!Objects.equals(structureRecord.getX(), characterRecord.getX()) || !Objects.equals(structureRecord.getY(), characterRecord.getY()))
+            throw new RuntimeException("character does not at structure");
 
         Player player = structureRecord.getPlayer();
 
