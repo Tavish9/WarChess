@@ -710,7 +710,11 @@ public class GameServiceImpl implements GameService {
         }
         gameRecord.setStructure(Objects.requireNonNullElse(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(neutralStructure), null));
         gameRecordRepository.save(gameRecord);
-        return null;
+
+        Player lastPlayer = gameDTO.currentPlayer()? player2 : player1;
+        List<ShopRecord> shopRecords = shopRecordRepository.findShopRecordsByPlayerAndRound(lastPlayer, gameDTO.round());
+        ShopDTO shopDTO = DTOUtil.toShopDTO(shopRecords);
+        return DTOUtil.toGameDTO(game,shopDTO,gameDTO.round(),gameDTO.currentPlayer());
     }
 
     private int prosperityDegree(Player player) {
