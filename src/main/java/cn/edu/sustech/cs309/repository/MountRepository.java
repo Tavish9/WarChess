@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MountRepository extends JpaRepository<Mount, Integer> {
     Mount findMountById(Integer id);
+
+    Mount findMountByName(String name);
 }

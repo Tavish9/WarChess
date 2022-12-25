@@ -16,4 +16,6 @@ public interface GameService {
     GameDTO update(Integer playerId) throws JsonProcessingException;
 
     GameDTO stepBack(Integer playerId, boolean current) throws JsonProcessingException;
+
+    GameDTO loadLocalArchive(String game) throws JsonProcessingException;
 }

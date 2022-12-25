@@ -1,22 +1,15 @@
 package cn.edu.sustech.cs309.service.impl;
 
-import ch.qos.logback.core.LogbackException;
 import cn.edu.sustech.cs309.domain.Map;
 import cn.edu.sustech.cs309.domain.*;
-import cn.edu.sustech.cs309.dto.ArchiveDTO;
-import cn.edu.sustech.cs309.dto.CharacterDTO;
-import cn.edu.sustech.cs309.dto.GameDTO;
-import cn.edu.sustech.cs309.dto.ShopDTO;
+import cn.edu.sustech.cs309.dto.*;
 import cn.edu.sustech.cs309.repository.*;
 import cn.edu.sustech.cs309.service.GameService;
 import cn.edu.sustech.cs309.utils.DTOUtil;
 import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.java.Log;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hibernate.collection.internal.PersistentList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -418,6 +411,7 @@ public class GameServiceImpl implements GameService {
             Equipment equipment = equipmentRecord.getEquipment();
             shopRecord = ShopRecord.builder()
                     .round(round + 2)
+                    .player(player1)
                     .name(equipment.getName())
                     .description(equipment.getDescription())
                     .shopClass(ShopClass.EQUIPMENT)
@@ -430,6 +424,7 @@ public class GameServiceImpl implements GameService {
             Item item = itemRecord.getItem();
             shopRecord = ShopRecord.builder()
                     .round(round + 2)
+                    .player(player1)
                     .name(item.getName())
                     .description(item.getDescription())
                     .shopClass(ShopClass.ITEM)
@@ -442,6 +437,7 @@ public class GameServiceImpl implements GameService {
             Mount mount = mountRecord.getMount();
             shopRecord = ShopRecord.builder()
                     .round(round + 2)
+                    .player(player1)
                     .name(mount.getName())
                     .description(mount.getDescription())
                     .shopClass(ShopClass.MOUNT)
@@ -480,11 +476,11 @@ public class GameServiceImpl implements GameService {
         // update current shop info
         player1.getShopRecords().clear();
         List<ShopRecord> shopRecords1 = shopRecordRepository.findShopRecordsByPlayerAndRound(player1, round);
-        if (shopRecords1 != null)
+        if (!shopRecords1.isEmpty())
             player1.getShopRecords().addAll(shopRecords1);
         player2.getShopRecords().clear();
         List<ShopRecord> shopRecords2 = shopRecordRepository.findShopRecordsByPlayerAndRound(player2, round - 1);
-        if (shopRecords2 != null)
+        if (!shopRecords2.isEmpty())
             player2.getShopRecords().addAll(shopRecords2);
         return DTOUtil.toGameDTO(game, shopDTO, round, currentPlayer);
     }
@@ -559,6 +555,162 @@ public class GameServiceImpl implements GameService {
         else
             currentPlayer = last.getRound() % 2 == 1;
         return DTOUtil.toGameDTO(game, shopDTO, last.getRound(), currentPlayer);
+    }
+
+    public static String mapToString(int[][] map, int mapSize){
+        StringBuilder mapData= new StringBuilder("[");
+        for (int i=0;i<mapSize;i++){
+            if (i!=0) mapData.append(',');
+            mapData.append('[');
+            for (int j=0;j<mapSize;j++){
+                if (j!=0) mapData.append(',');
+                mapData.append(map[i][j]);
+            }
+            mapData.append(']');
+        }
+        mapData.append(']');
+        return String.valueOf(mapData);
+    }
+
+    private Player getPlayer(PlayerDTO playerDTO,Game game,GameDTO gameDTO) throws JsonProcessingException {
+        Player player=playerRepository.findPlayerById(playerDTO.id());
+        Account account=player.getAccount();
+
+        List<CharacterRecord>characterRecords=new ArrayList<>();
+        List<EquipmentRecord>equipmentRecords=new ArrayList<>();
+        List<ItemRecord>itemRecords=new ArrayList<>();
+        List<MountRecord>mountRecords=new ArrayList<>();
+        List<StructureRecord>structureRecords=new ArrayList<>();
+
+        for (EquipmentDTO e:playerDTO.equipments()){
+            EquipmentRecord equipmentRecord=EquipmentRecord.builder()
+                    .used(false).equipment(equipmentRepository.findEquipmentByName(e.name()))
+                    .build();
+            equipmentRecord=equipmentRecordRepository.save(equipmentRecord);
+            equipmentRecords.add(equipmentRecord);
+        }
+        for (ItemDTO i:playerDTO.items()){
+            ItemRecord itemRecord=ItemRecord.builder().item(itemRepository.findItemByName(i.name())).build();
+            itemRecord=itemRecordRepository.save(itemRecord);
+            itemRecords.add(itemRecord);
+        }
+        for (MountDTO m:playerDTO.mounts()){
+            MountRecord mountRecord=MountRecord.builder()
+                    .used(false).mount(mountRepository.findMountByName(m.name()))
+                    .build();
+            mountRecord=mountRecordRepository.save(mountRecord);
+            mountRecords.add(mountRecord);
+        }
+        for (CharacterDTO c:playerDTO.characters()){
+            CharacterRecord characterRecord=CharacterRecord.builder().x(c.x()).y(c.y())
+                    .attack(c.attack()).defense(c.defense()).hp(c.hp()).level(c.level())
+                    .actionRange(c.actionRange()).actionState(c.actionState()).characterClass(c.characterClass())
+                    .name(c.name()).build();
+            if (c.equipment()!=null){
+                EquipmentRecord equipmentRecord=EquipmentRecord.builder()
+                        .used(true).equipment(equipmentRepository.findEquipmentByName(c.equipment().name()))
+                        .build();
+                equipmentRecord=equipmentRecordRepository.save(equipmentRecord);
+                equipmentRecords.add(equipmentRecord);
+                characterRecord.setEquipmentRecord(equipmentRecord);
+            }
+            if (c.mount()!=null){
+                MountRecord mountRecord=MountRecord.builder().
+                        mount(mountRepository.findMountByName(c.mount().name())).used(true).build();
+                mountRecord=mountRecordRepository.save(mountRecord);
+                mountRecords.add(mountRecord);
+                characterRecord.setMountRecord(mountRecord);
+            }
+            characterRecord=characterRecordRepository.save(characterRecord);
+            characterRecords.add(characterRecord);
+        }
+        List<ShopRecord> shopRecords=new ArrayList<>();
+        for (EquipmentDTO e:playerDTO.shopDTO().equipments()){
+            ShopRecord shopRecord=ShopRecord.builder().shopClass(ShopClass.EQUIPMENT)
+                    .round(gameDTO.round()).name(e.name()).cost(7)
+                    .description(e.description()).propid(equipmentRepository.findEquipmentByName(e.name()).getId())
+                    .build();
+            shopRecord=shopRecordRepository.save(shopRecord);
+            shopRecords.add(shopRecord);
+        }
+        for (MountDTO e:playerDTO.shopDTO().mounts()){
+            ShopRecord shopRecord=ShopRecord.builder().shopClass(ShopClass.MOUNT)
+                    .round(gameDTO.round()).name(e.name()).cost(7)
+                    .description(e.description()).propid(mountRepository.findMountByName(e.name()).getId())
+                    .build();
+            shopRecord=shopRecordRepository.save(shopRecord);
+            shopRecords.add(shopRecord);
+        }
+        for (ItemDTO e:playerDTO.shopDTO().items()){
+            ShopRecord shopRecord=ShopRecord.builder().shopClass(ShopClass.ITEM)
+                    .round(gameDTO.round()).name(e.name()).cost(7)
+                    .description(e.description()).propid(itemRepository.findItemByName(e.name()).getId())
+                    .build();
+            shopRecord=shopRecordRepository.save(shopRecord);
+            shopRecords.add(shopRecord);
+        }
+        for (StructureDTO s:playerDTO.structures()){
+            String characterString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(s.characters());
+            StructureRecord structureRecord=StructureRecord.builder()
+                    .x(s.x()).y(s.y())
+                    .hp(s.hp()).level(s.level()).game(game)
+                    .structureClass(s.structureClass())
+                    .remainingRound(s.remainingRound()).value(s.value())
+                    .character(characterString)
+                    .build();
+            structureRecord=structureRecordRepository.save(structureRecord);
+            structureRecords.add(structureRecord);
+        }
+        int[] r=playerDTO.technologyTree()[1];
+        int[] f=playerDTO.technologyTree()[0];
+        return Player.builder().game(game)
+                .characterRecords(characterRecords).equipmentRecords(equipmentRecords)
+                .itemRecords(itemRecords).mountRecords(mountRecords)
+                .structureRecords(structureRecords)
+                .account(account).vision(null)
+                .peaceDegree(playerDTO.peaceDegree()).prosperityDegree(playerDTO.prosperityDegree())
+                .stars(playerDTO.stars()).shopRecords(shopRecords)
+                .techtreeRemainRound(Arrays.toString(r)).techtreeFeasible(Arrays.toString(f))
+                .build();
+    }
+
+    @Override
+    public GameDTO loadLocalArchive(String gameStr) throws JsonProcessingException {
+
+        GameDTO gameDTO = objectMapper.readValue(gameStr,GameDTO.class);
+
+        Map map=Map.builder().data(mapToString(gameDTO.map(),17)).build();
+        map=mapRepository.save(map);
+
+        int playerFirst=gameDTO.round();
+        if (gameDTO.currentPlayer())playerFirst++;
+
+        Game game=Game.builder().playerFirst(playerFirst%2==1).map(map).build();
+        game=gameRepository.save(game);
+
+        Player player1,player2;
+
+        player1=getPlayer(gameDTO.player1(),game,gameDTO);
+        player1=playerRepository.save(player1);
+        player2=getPlayer(gameDTO.player2(),game,gameDTO);
+        player2=playerRepository.save(player2);
+
+        GameRecord gameRecord=GameRecord.builder().game(game).round(gameDTO.round()).build();
+        gameRecord.setPlayer1(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(player1));
+        gameRecord.setPlayer2(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(player2));
+
+        List<StructureDTO> structureDTOS=gameDTO.structures();
+        List<StructureRecord> neutralStructure=new ArrayList<>();
+        //add structure into repository
+        for (StructureDTO x:structureDTOS){
+            String characterString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(x.characters());
+            StructureRecord structureRecord=StructureRecord.builder().player(null).game(game).hp(x.hp()).structureClass(x.structureClass()).x(x.x()).y(x.y()).character(characterString).level(x.level()).remainingRound(x.remainingRound()).value(x.value()).build();
+            structureRecordRepository.save(structureRecord);
+            neutralStructure.add(structureRecord);
+        }
+        gameRecord.setStructure(Objects.requireNonNullElse(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(neutralStructure), null));
+        gameRecordRepository.save(gameRecord);
+        return null;
     }
 
     private int prosperityDegree(Player player) {
@@ -654,8 +806,9 @@ public class GameServiceImpl implements GameService {
         ItemRecord itemRecord = ItemRecord.builder().item(item).build();
         return itemRecordRepository.save(itemRecord);
     }
+
+
     public static String randomMap(int mapSize){
-        StringBuilder mapData= new StringBuilder("[");
         Random r = new Random();
         int[][] height = new int[mapSize][mapSize];
         int[][] newMap = new int[mapSize][mapSize];
@@ -843,16 +996,6 @@ public class GameServiceImpl implements GameService {
             newMap[i][mapSize-1]=2;
         }
 //      transform data to string
-        for (int i=0;i<mapSize;i++){
-            if (i!=0) mapData.append(',');
-            mapData.append('[');
-            for (int j=0;j<mapSize;j++){
-                if (j!=0) mapData.append(',');
-                mapData.append(newMap[i][j]);
-            }
-            mapData.append(']');
-        }
-        mapData.append(']');
-        return String.valueOf(mapData);
+        return mapToString(newMap,mapSize);
     }
 }

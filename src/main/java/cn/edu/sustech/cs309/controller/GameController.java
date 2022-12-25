@@ -54,4 +54,11 @@ public class GameController {
                                       @RequestParam(value = "current") boolean current) throws JsonProcessingException {
         return ResponseResult.success(gameService.stepBack(playerId, current));
     }
+
+    @ApiOperation(value="读取本地存档")
+    @PutMapping("/game/copy")
+    public ResponseResult<?> copy(@RequestParam(value="game") String game) throws JsonProcessingException {
+        return ResponseResult.success(gameService.loadLocalArchive(game));
+    }
+
 }
