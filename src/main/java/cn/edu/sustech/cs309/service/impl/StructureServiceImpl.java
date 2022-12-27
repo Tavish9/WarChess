@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -179,13 +180,17 @@ public class StructureServiceImpl implements StructureService {
 
         String techTreeFeasible = player.getTechtreeFeasible();
         String[] feasible = techTreeFeasible.split(", ");
+        int[] f= Arrays.stream(feasible).mapToInt(Integer::parseInt).toArray();
         if (feasible[v].equals("0"))
             throw new RuntimeException("Tree node is not feasible");
         if (Player.map.get(Player.name[v])[1] > player.getStars())
             throw new RuntimeException("player does not have enough money");
         player.setStars(player.getStars() - Player.map.get(Player.name[v])[1]);
-        playerRepository.save(player);
+        f[v]=0;
+        String feasibleStr=Arrays.toString(f);
+        player.setTechtreeFeasible(feasibleStr.substring(1,feasibleStr.length()-1));
 
+        playerRepository.save(player);
         characterRecord.setActionState(2);
         characterRecordRepository.save(characterRecord);
 

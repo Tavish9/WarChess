@@ -344,14 +344,27 @@ public class GameServiceImpl implements GameService {
             }
         }
         String techTreeRemainRound = player1.getTechtreeRemainRound();
+        String techTreeFeasible=player1.getTechtreeFeasible();
         String[] remainCnt = techTreeRemainRound.split(", ");
+        String[] feasibleCnt = techTreeFeasible.split(", ");
         int[] r = Arrays.stream(remainCnt).mapToInt(Integer::parseInt).toArray();
-
+        int[] f = Arrays.stream(feasibleCnt).mapToInt(Integer::parseInt).toArray();
         for (StructureRecord s : player1Structures) {
             if (s.getRemainingRound() > 0) {
                 if (s.getStructureClass() == StructureClass.INSTITUTE) {
                     if (r[s.getValue()] > 0) {
                         r[s.getValue()]--;
+                        if (r[s.getValue()]==0){
+                            int v=s.getValue();
+                            if (v==0)f[1]=f[2]=f[3]=1;
+                            if (v==1)f[4]=1;
+                            if (v==2)f[6]=1;
+                            if (v==3)f[8]=1;
+                            if (v==4)f[5]=1;
+                            if (v==6)f[7]=1;
+                            if (v==8)f[9]=1;
+                            if (v==9)f[10]=1;
+                        }
                     }
                 }
                 if (s.getRemainingRound() == 1) {
@@ -392,6 +405,8 @@ public class GameServiceImpl implements GameService {
             }
         }
         techTreeRemainRound = Arrays.toString(r);
+        techTreeFeasible=Arrays.toString(f);
+        player1.setTechtreeFeasible(techTreeFeasible.substring(1, techTreeFeasible.length() - 1));
         player1.setTechtreeRemainRound(techTreeRemainRound.substring(1, techTreeRemainRound.length() - 1));
         playerRepository.save(player1);
 

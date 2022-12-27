@@ -118,6 +118,12 @@ public class CharacterServiceImpl implements CharacterService {
                             int[] r = Arrays.stream(remain).mapToInt(Integer::parseInt).toArray();
                             r[s.getValue()] = Player.map.get(Player.name[s.getValue()])[0];
                             techTreeRemainRound = Arrays.toString(r);
+                            String techTreeFeasible = player.getTechtreeFeasible();
+                            String[] feasible = techTreeFeasible.split(", ");
+                            int[] f= Arrays.stream(feasible).mapToInt(Integer::parseInt).toArray();
+                            f[s.getValue()]=1;
+                            String feasibleStr=Arrays.toString(f);
+                            player.setTechtreeFeasible(feasibleStr.substring(1,feasibleStr.length()-1));
                             player.setTechtreeRemainRound(techTreeRemainRound.substring(1, techTreeRemainRound.length() - 1));
                             playerRepository.save(player);
                         }
@@ -170,12 +176,21 @@ public class CharacterServiceImpl implements CharacterService {
                     r[structure.getValue()] = Player.map.get(Player.name[structure.getValue()])[0];
                     techTreeRemainRound = Arrays.toString(r);
                     player.setTechtreeRemainRound(techTreeRemainRound.substring(1, techTreeRemainRound.length() - 1));
+                    String techTreeFeasible = player.getTechtreeFeasible();
+                    String[] feasible = techTreeFeasible.split(", ");
+                    int[] f= Arrays.stream(feasible).mapToInt(Integer::parseInt).toArray();
+                    f[structure.getValue()]=1;
+                    String feasibleStr=Arrays.toString(f);
+                    player.setTechtreeFeasible(feasibleStr.substring(1,feasibleStr.length()-1));
                     playerRepository.save(player);
                 }
                 structure.setPlayer(character.getPlayer());
                 structure.setValue(0);
                 structure.setRemainingRound(0);
             }
+            structure.setPlayer(character.getPlayer());
+            structure.setValue(0);
+            structure.setRemainingRound(0);
         }
         structureRecordRepository.save(structure);
         return DTOUtil.toStructureDTO(structure);
