@@ -9,6 +9,7 @@ import cn.edu.sustech.cs309.utils.DTOUtil;
 import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Builder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -173,7 +174,7 @@ public class GameServiceImpl implements GameService {
         character1.setPlayer(player1);
         characterRecordRepository.save(character1);
         StructureRecord structureRecord1 = StructureRecord.builder()
-                .x(character1.getX()).y(character1.getY()).game(game).player(player1).build();
+                .x(character1.getX()).y(character1.getY()).game(game).player(player1).structureClass(StructureClass.BASE).build();
         structureRecordRepository.save(structureRecord1);
         player1.getStructureRecords().add(structureRecord1);
         player1.getCharacterRecords().add(character1);
@@ -190,7 +191,7 @@ public class GameServiceImpl implements GameService {
         character2.setPlayer(player2);
         characterRecordRepository.save(character2);
         StructureRecord structureRecord2 = StructureRecord.builder()
-                .x(character2.getX()).y(character2.getY()).game(game).player(player2).build();
+                .x(character2.getX()).y(character2.getY()).game(game).player(player2).structureClass(StructureClass.BASE).build();
         structureRecordRepository.save(structureRecord2);
         player2.getStructureRecords().add(structureRecord2);
         player2.getCharacterRecords().add(character2);
@@ -572,9 +573,8 @@ public class GameServiceImpl implements GameService {
         return String.valueOf(mapData);
     }
 
-    private Player getPlayer(PlayerDTO playerDTO,Game game,GameDTO gameDTO) throws JsonProcessingException {
-        Player player=playerRepository.findPlayerById(playerDTO.id());
-        Account account=player.getAccount();
+    private Player getPlayer(PlayerDTO playerDTO, Game game, LocalArchiveDTO gameDTO) throws JsonProcessingException {
+        Account account=playerRepository.findPlayerById(playerDTO.id()).getAccount();
 
         List<CharacterRecord>characterRecords=new ArrayList<>();
         List<EquipmentRecord>equipmentRecords=new ArrayList<>();
@@ -582,21 +582,37 @@ public class GameServiceImpl implements GameService {
         List<MountRecord>mountRecords=new ArrayList<>();
         List<StructureRecord>structureRecords=new ArrayList<>();
 
+
+        int[] r=playerDTO.technologyTree()[1];
+        int[] f=playerDTO.technologyTree()[0];
+        String rstr=Arrays.toString(r),fstr=Arrays.toString(f);
+        rstr=rstr.substring(1,rstr.length()-1);
+        fstr=fstr.substring(1,fstr.length()-1);
+        Player player=Player.builder().game(game)
+                .account(account).vision(null)
+                .peaceDegree(playerDTO.peaceDegree()).prosperityDegree(playerDTO.prosperityDegree())
+                .stars(playerDTO.stars())
+                .techtreeRemainRound(rstr).techtreeFeasible(fstr)
+                .build();
+        player=playerRepository.save(player);
         for (EquipmentDTO e:playerDTO.equipments()){
             EquipmentRecord equipmentRecord=EquipmentRecord.builder()
                     .used(false).equipment(equipmentRepository.findEquipmentByName(e.name()))
+                    .player(player)
                     .build();
             equipmentRecord=equipmentRecordRepository.save(equipmentRecord);
             equipmentRecords.add(equipmentRecord);
         }
         for (ItemDTO i:playerDTO.items()){
-            ItemRecord itemRecord=ItemRecord.builder().item(itemRepository.findItemByName(i.name())).build();
+            ItemRecord itemRecord=ItemRecord.builder().item(itemRepository.findItemByName(i.name()))
+                    .player(player).build();
             itemRecord=itemRecordRepository.save(itemRecord);
             itemRecords.add(itemRecord);
         }
         for (MountDTO m:playerDTO.mounts()){
             MountRecord mountRecord=MountRecord.builder()
                     .used(false).mount(mountRepository.findMountByName(m.name()))
+                    .player(player)
                     .build();
             mountRecord=mountRecordRepository.save(mountRecord);
             mountRecords.add(mountRecord);
@@ -604,80 +620,59 @@ public class GameServiceImpl implements GameService {
         for (CharacterDTO c:playerDTO.characters()){
             CharacterRecord characterRecord=CharacterRecord.builder().x(c.x()).y(c.y())
                     .attack(c.attack()).defense(c.defense()).hp(c.hp()).level(c.level())
+                    .player(player)
                     .actionRange(c.actionRange()).actionState(c.actionState()).characterClass(c.characterClass())
                     .name(c.name()).build();
             if (c.equipment()!=null){
-                EquipmentRecord equipmentRecord=EquipmentRecord.builder()
-                        .used(true).equipment(equipmentRepository.findEquipmentByName(c.equipment().name()))
-                        .build();
-                equipmentRecord=equipmentRecordRepository.save(equipmentRecord);
-                equipmentRecords.add(equipmentRecord);
-                characterRecord.setEquipmentRecord(equipmentRecord);
+                if (c.equipment().id()!=0) {
+                    EquipmentRecord equipmentRecord = EquipmentRecord.builder()
+                            .used(true).equipment(equipmentRepository.findEquipmentByName(c.equipment().name()))
+                            .player(player)
+                            .build();
+                    equipmentRecord = equipmentRecordRepository.save(equipmentRecord);
+                    equipmentRecords.add(equipmentRecord);
+                    characterRecord.setEquipmentRecord(equipmentRecord);
+                }
             }
             if (c.mount()!=null){
-                MountRecord mountRecord=MountRecord.builder().
-                        mount(mountRepository.findMountByName(c.mount().name())).used(true).build();
-                mountRecord=mountRecordRepository.save(mountRecord);
-                mountRecords.add(mountRecord);
-                characterRecord.setMountRecord(mountRecord);
+                if (c.mount().id()!=0) {
+                    MountRecord mountRecord = MountRecord.builder().
+                            mount(mountRepository.findMountByName(c.mount().name())).used(true)
+                            .player(player).build();
+                    mountRecord = mountRecordRepository.save(mountRecord);
+                    mountRecords.add(mountRecord);
+                    characterRecord.setMountRecord(mountRecord);
+                }
             }
             characterRecord=characterRecordRepository.save(characterRecord);
             characterRecords.add(characterRecord);
         }
-        List<ShopRecord> shopRecords=new ArrayList<>();
-        for (EquipmentDTO e:playerDTO.shopDTO().equipments()){
-            ShopRecord shopRecord=ShopRecord.builder().shopClass(ShopClass.EQUIPMENT)
-                    .round(gameDTO.round()).name(e.name()).cost(7)
-                    .description(e.description()).propid(equipmentRepository.findEquipmentByName(e.name()).getId())
-                    .build();
-            shopRecord=shopRecordRepository.save(shopRecord);
-            shopRecords.add(shopRecord);
-        }
-        for (MountDTO e:playerDTO.shopDTO().mounts()){
-            ShopRecord shopRecord=ShopRecord.builder().shopClass(ShopClass.MOUNT)
-                    .round(gameDTO.round()).name(e.name()).cost(7)
-                    .description(e.description()).propid(mountRepository.findMountByName(e.name()).getId())
-                    .build();
-            shopRecord=shopRecordRepository.save(shopRecord);
-            shopRecords.add(shopRecord);
-        }
-        for (ItemDTO e:playerDTO.shopDTO().items()){
-            ShopRecord shopRecord=ShopRecord.builder().shopClass(ShopClass.ITEM)
-                    .round(gameDTO.round()).name(e.name()).cost(7)
-                    .description(e.description()).propid(itemRepository.findItemByName(e.name()).getId())
-                    .build();
-            shopRecord=shopRecordRepository.save(shopRecord);
-            shopRecords.add(shopRecord);
-        }
         for (StructureDTO s:playerDTO.structures()){
             String characterString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(s.characters());
+
             StructureRecord structureRecord=StructureRecord.builder()
                     .x(s.x()).y(s.y())
                     .hp(s.hp()).level(s.level()).game(game)
                     .structureClass(s.structureClass())
+                    .player(player)
                     .remainingRound(s.remainingRound()).value(s.value())
                     .character(characterString)
                     .build();
             structureRecord=structureRecordRepository.save(structureRecord);
             structureRecords.add(structureRecord);
         }
-        int[] r=playerDTO.technologyTree()[1];
-        int[] f=playerDTO.technologyTree()[0];
-        return Player.builder().game(game)
-                .characterRecords(characterRecords).equipmentRecords(equipmentRecords)
-                .itemRecords(itemRecords).mountRecords(mountRecords)
-                .structureRecords(structureRecords)
-                .account(account).vision(null)
-                .peaceDegree(playerDTO.peaceDegree()).prosperityDegree(playerDTO.prosperityDegree())
-                .stars(playerDTO.stars()).shopRecords(shopRecords)
-                .techtreeRemainRound(Arrays.toString(r)).techtreeFeasible(Arrays.toString(f))
-                .build();
+        player.setCharacterRecords(characterRecords);
+        player.setEquipmentRecords(equipmentRecords);
+        player.setItemRecords(itemRecords);
+        player.setMountRecords(mountRecords);
+        player.setStructureRecords(structureRecords);
+        return playerRepository.save(player);
     }
 
     @Override
     public GameDTO loadLocalArchive(String gameStr) throws JsonProcessingException {
 
-        GameDTO gameDTO = objectMapper.readValue(gameStr,GameDTO.class);
+        LocalArchiveDTO gameDTO = objectMapper.readValue(gameStr,LocalArchiveDTO.class);
 
         Map map=Map.builder().data(mapToString(gameDTO.map(),17)).build();
         map=mapRepository.save(map);
@@ -691,8 +686,45 @@ public class GameServiceImpl implements GameService {
         Player player1,player2;
 
         player1=getPlayer(gameDTO.player1(),game,gameDTO);
-        player1=playerRepository.save(player1);
         player2=getPlayer(gameDTO.player2(),game,gameDTO);
+
+
+        List<ShopRecord> shopRecords=new ArrayList<>();
+        if (gameDTO.equipmentDTOS()!=null) {
+            for (EquipmentDTO e : gameDTO.equipmentDTOS()) {
+                ShopRecord shopRecord = ShopRecord.builder().shopClass(ShopClass.EQUIPMENT)
+                        .round(gameDTO.round()).name(e.name()).cost(7)
+                        .description(e.description()).propid(equipmentRepository.findEquipmentByName(e.name()).getId())
+                        .build();
+                shopRecord = shopRecordRepository.save(shopRecord);
+                shopRecords.add(shopRecord);
+            }
+            for (MountDTO e : gameDTO.mountDTOS()) {
+                ShopRecord shopRecord = ShopRecord.builder().shopClass(ShopClass.MOUNT)
+                        .round(gameDTO.round()).name(e.name()).cost(7)
+                        .description(e.description()).propid(mountRepository.findMountByName(e.name()).getId())
+                        .build();
+                shopRecord = shopRecordRepository.save(shopRecord);
+                shopRecords.add(shopRecord);
+            }
+            for (ItemDTO e : gameDTO.itemDTOS()) {
+                ShopRecord shopRecord = ShopRecord.builder().shopClass(ShopClass.ITEM)
+                        .round(gameDTO.round()).name(e.name()).cost(7)
+                        .description(e.description()).propid(itemRepository.findItemByName(e.name()).getId())
+                        .build();
+                shopRecord = shopRecordRepository.save(shopRecord);
+                shopRecords.add(shopRecord);
+            }
+            if (gameDTO.currentPlayer()){
+                player2.setShopRecords(shopRecords);
+            }
+            else {
+                player1.setShopRecords(shopRecords);
+            }
+        }
+        player1.setVision(playerRepository.findPlayerById(gameDTO.player1().id()).getVision());
+        player2.setVision(playerRepository.findPlayerById(gameDTO.player2().id()).getVision());
+        player1=playerRepository.save(player1);
         player2=playerRepository.save(player2);
 
         GameRecord gameRecord=GameRecord.builder().game(game).round(gameDTO.round()).build();
@@ -712,7 +744,7 @@ public class GameServiceImpl implements GameService {
         gameRecordRepository.save(gameRecord);
 
         Player lastPlayer = gameDTO.currentPlayer()? player2 : player1;
-        List<ShopRecord> shopRecords = shopRecordRepository.findShopRecordsByPlayerAndRound(lastPlayer, gameDTO.round());
+        shopRecords = shopRecordRepository.findShopRecordsByPlayerAndRound(lastPlayer, gameDTO.round());
         ShopDTO shopDTO = DTOUtil.toShopDTO(shopRecords);
         return DTOUtil.toGameDTO(game,shopDTO,gameDTO.round(),gameDTO.currentPlayer());
     }

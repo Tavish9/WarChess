@@ -200,7 +200,8 @@ public class StructureServiceImpl implements StructureService {
         StructureRecord structureRecord = structureRecordRepository.findStructureRecordById(structureId);
         if (structureRecord == null)
             throw new RuntimeException("structure does not exist");
-
+        if (structureRecord.getStructureClass()==StructureClass.BASE)
+            throw new RuntimeException("Base can not be update");
         if (structureRecord.getStructureClass() == StructureClass.RELIC)
             throw new RuntimeException("Relic can not be update");
         if (structureRecord.getStructureClass() == StructureClass.INSTITUTE && structureRecord.getLevel() == 1)

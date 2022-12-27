@@ -6,4 +6,5 @@ public enum StructureClass {
     MARKET,
     INSTITUTE,
     RELIC,
+    BASE,
 }
